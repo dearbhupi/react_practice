@@ -7,6 +7,7 @@ import User from './components/User'
 import Admin from './components/Admin'
 import Databinding from './components/Databinding'
 import UseStateEx from './components/UseStateEx'
+import UseStateEx2 from './components/UseStateEx2'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -16,7 +17,7 @@ function App() {
       {/* <User />
       <Admin />
       <Databinding /> */}
-      <UseStateEx />
+      <UseStateEx2 />
     </>
   )
 }
