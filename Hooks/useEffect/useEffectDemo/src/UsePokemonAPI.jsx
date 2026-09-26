@@ -9,24 +9,24 @@ function Pokemon() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    const controller = new AbortController();
+    const source = axios.CancelToken.source();
 
     axios
       .get(`https://pokeapi.co/api/v2/pokemon?limit=10&offset=${(currentPage - 1) * 10}`, {
-        signal: controller.signal,
+        cancelToken: source.token,
       })
       .then((response) => {
         setPokemonList(response.data.results);
         setTotalPages(Math.ceil(response.data.count / 10));
       })
       .catch((error) => {
-        if (error.name !== "CanceledError" && error.name !== "AbortError") {
+        if (!axios.isCancel(error)) {
           console.error("Failed to fetch Pokémon:", error);
         }
       });
 
     return () => {
-      controller.abort();
+      source.cancel("Request cancelled on component unmount");
     };
   }, [currentPage]);
 
