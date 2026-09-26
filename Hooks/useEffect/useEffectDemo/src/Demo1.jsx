@@ -24,15 +24,25 @@ function Demo1() {
   useEffect(() => {
     console.log("Resource type changed to:", resourceType);
 
-    fetch(`https://jsonplaceholder.typicode.com/${resourceType}`)
+    const controller = new AbortController();
+
+    fetch(`https://jsonplaceholder.typicode.com/${resourceType}`, {
+      signal: controller.signal,
+    })
       .then((response) => response.json())
       .then((json) => {
         console.log(json);
         setData(json);
       })
       .catch((error) => {
-        console.error("Failed to fetch data:", error);
+        if (error.name !== "AbortError") {
+          console.error("Failed to fetch data:", error);
+        }
       });
+
+    return () => {
+      controller.abort();
+    };
   }, [resourceType]);
 
   return (
