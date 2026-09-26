@@ -2,13 +2,17 @@ import { useState , useEffect } from "react";
 
 function Demo1() {
   const [resourceType, setResourceType] = useState("post");
+  const [data, setData] = useState([]);
 
 
   useEffect(() => {
     console.log("Resource type changed to:", resourceType);
     fetch(`https://jsonplaceholder.typicode.com/${resourceType}`)
       .then(response => response.json())
-      .then(json => console.log(json))
+      .then(json => {
+        console.log(json);
+        setData(json);
+      } )
   }, [resourceType]); // in [] we provide the values whenever the effect should re-run, e.g if player died, if amount changed etc
 
   return (
@@ -20,6 +24,11 @@ function Demo1() {
       </div>
 
       <h1>{resourceType}</h1>
+      <ul>
+        {data.map(item => (
+          <li key={item.id}>{JSON.stringify(item)}</li>
+        ))}
+      </ul> 
     </>
   );
 }
