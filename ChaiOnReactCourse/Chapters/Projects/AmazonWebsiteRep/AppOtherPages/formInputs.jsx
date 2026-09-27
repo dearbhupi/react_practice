@@ -16,7 +16,6 @@ function FormInputs() {
       [name]: value,
     }));
 
-    // This will print every key stroke in the console
     console.log(`${name}: ${value}`);
   };
 
@@ -25,10 +24,13 @@ function FormInputs() {
 
     console.log("Submitted form:", formData);
 
-    if (formData.name && formData.password) {
+    if (
+      formData.name === "bhupinder" &&
+      formData.password === "secret"
+    ) {
       setSuccessMessage("Success! Form submitted successfully.");
     } else {
-      setSuccessMessage("Please enter both name and password.");
+      setSuccessMessage("Please enter valid name and password.");
     }
   };
 
