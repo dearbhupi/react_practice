@@ -16,7 +16,7 @@ function FormInputs() {
       [name]: value,
     }));
 
-    console.log(`${name}: ${value}`);
+    console.log(`name: ${name}, value: ${value}`)
   };
 
   const handleSubmit = (event) => {
