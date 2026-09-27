@@ -6,7 +6,6 @@ function App() {
   const country = "India";
   const phone = "123-456-7890";
   const cellPhone = "333-222-1111";
-  const revelPhoneNumber = true;
   const [showPhone, setShowPhone] = useState(true);
 
   const toggleSecondPhone = () => {
