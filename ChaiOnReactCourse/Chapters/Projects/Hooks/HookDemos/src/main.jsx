@@ -4,9 +4,12 @@ import './index.css'
 //import App from './App.jsx'
 //import Demo1 from './UseApi.jsx'
 import Pokemon from '../useEffectDemos/UsePokemonAPI.jsx'
+import UseStateDemo from '../allHooks/use-state.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Pokemon />
+    {/* <Pokemon /> */}
+    <UseStateDemo />
+
   </StrictMode>,
 )
