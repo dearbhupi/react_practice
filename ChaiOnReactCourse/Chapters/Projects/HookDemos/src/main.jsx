@@ -7,6 +7,7 @@ import './index.css'
 import UseStateDemo from '../allHooks/use-state.jsx'
 import UseEffectDemo from '../allHooks/use-effect.jsx'  
 import ApiDataFetcher from '../allHooks/use-effectwithAPI.jsx'
+import UseDarkModeApp from '../allHooks/use-Context.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {/* <Pokemon /> */}
@@ -14,6 +15,7 @@ createRoot(document.getElementById('root')).render(
 
     <UseEffectDemo />
     <ApiDataFetcher />
+    <UseDarkModeApp />
 
   </StrictMode>,
 )
