@@ -367,7 +367,7 @@
 // export default UseDarkModeApp;
 
 
-import React, { useState, createContext, useContext } from "react";
+import { useState, createContext, useContext } from "react";
 
 // 1. Create the Magic Backpack
 const ThemeContext = createContext();
@@ -387,7 +387,7 @@ function UseDarkModeApp() {
     width: "60px",
     height: "30px",
     borderRadius: "15px",
-    backgroundColor: theme === "dark" ? "#4CAF50" : "#ccc",
+    backgroundColor: theme === "dark" ? "#0fb30f" : "#ccc",
     display: "flex",
     alignItems: "center",
     padding: "0 5px",
@@ -408,6 +408,7 @@ function UseDarkModeApp() {
     <ThemeContext.Provider value={theme}>
       <div style={appStyle}>
         <h1>My Awesome App</h1>
+         <p>using useContext hook</p>
 
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
           <strong>Switch Theme:</strong>

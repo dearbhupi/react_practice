@@ -16,6 +16,8 @@ createRoot(document.getElementById('root')).render(
     <UseEffectDemo />
     <ApiDataFetcher />
     <UseDarkModeApp />
+    <UseStateDemo/>
+
 
   </StrictMode>,
 )
