@@ -1,4 +1,13 @@
 import { StrictMode } from 'react'
+import AutoSaveDemo from '../allHooks/use-effect_autoSaveDemo.jsx'
+import UseEffectResizeDemo from '../allHooks/use-effect_ResizeDemo.jsx'
+import UseEffectShieldGame from '../allHooks/use-effect_ShieldGame.jsx'
+import UseEffectApiComparison from '../allHooks/use-effect_ApiComparison.jsx'
+import BankingUseEffectDemo from '../allHooks/use-effect_BankingDemo.jsx'
+import WeatherWithUseEffect from '../allHooks/WeatherWithUseEffect.jsx'
+import WeatherWithoutUseEffect from '../allHooks/WeatherWithoutUseEffect.jsx'
+import WeatherCodeComparison from '../allHooks/WeatherCodeComparison.jsx'
+import UseEffectGame from '../allHooks/use-effect_Game.jsx'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 //import App from './App.jsx'
@@ -20,6 +29,15 @@ createRoot(document.getElementById('root')).render(
     <UseDarkModeApp />
     <UseContextAppAPI />
     <UseContextvsuseEffect />
+    <UseEffectGame />
+    <AutoSaveDemo />
+    <UseEffectResizeDemo />
+    <UseEffectShieldGame />
+    <UseEffectApiComparison />
+    <BankingUseEffectDemo />
+    <WeatherWithUseEffect />
+    <WeatherWithoutUseEffect />
+    <WeatherCodeComparison />
 
 
 
