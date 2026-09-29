@@ -565,7 +565,7 @@
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-top: 14px;
 }
@@ -576,7 +576,7 @@
   grid-template-columns: 38px 1fr;
   align-items: center;
   column-gap: 12px;
-  min-height: 92px;
+  min-height: 104px;
   padding: 15px 17px;
   border: 1px solid color-mix(in srgb, var(--metric-accent), var(--line) 70%);
   border-top: 3px solid var(--metric-accent);
@@ -602,11 +602,15 @@
   --metric-accent: #c47a2c;
 }
 
+.metric-uv {
+  --metric-accent: #c05252;
+}
+
 .metric-icon {
   display: grid;
   width: 36px;
   aspect-ratio: 1;
-  grid-row: span 2;
+  grid-row: span 3;
   place-items: center;
   border-radius: 50%;
   color: var(--metric-accent);
@@ -622,8 +626,15 @@
 
 .metric strong {
   color: var(--ink);
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.1;
+}
+
+.metric-advice {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.25;
 }
 
 .hourly-section {
@@ -655,7 +666,7 @@
 
 .hourly-list {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   margin-top: 0;
   overflow: visible;
   gap: 4px;
@@ -667,6 +678,7 @@
 .hourly-forecast-card {
   margin-top: 16px;
   padding: 12px 16px 8px;
+  overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--paper);
@@ -682,10 +694,17 @@
   padding: 10px 4px;
   border: 0;
   border-radius: 12px;
+  animation: hourly-card-in 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  transition: background-color 180ms ease, transform 180ms ease;
 }
 
-.hour:first-child {
+.hour:hover {
+  transform: translateY(-3px);
+}
+
+.hour-current {
   background: color-mix(in srgb, var(--paper), var(--green) 7%);
+  box-shadow: 0 5px 16px rgb(32 53 81 / 9%);
 }
 
 .hour-time,
@@ -700,6 +719,12 @@
 
 .hour strong {
   font-size: 19px;
+}
+
+.hour-rain {
+  color: #278eae;
+  font-size: 9px;
+  font-weight: 600;
 }
 
 .rain-chance {
@@ -723,17 +748,32 @@
 .hourly-line-shadow {
   stroke: rgb(237 138 47 / 20%);
   stroke-width: 9;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hourly-line-draw 900ms ease-out 120ms both;
 }
 
 .hourly-line {
   stroke: #ed8a2f;
   stroke-width: 3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hourly-line-draw 900ms ease-out both;
+}
+
+.hourly-line-area {
+  fill: url(#hourly-area-gradient);
+  animation: hourly-area-in 900ms ease-out both;
 }
 
 .hourly-line-point {
   fill: #ed8a2f;
   stroke: var(--paper);
   stroke-width: 2;
+}
+
+.hourly-line-point-current {
+  animation: current-hour-pulse 1.8s ease-in-out infinite;
 }
 
 .loading-hours {
@@ -756,16 +796,29 @@
 }
 
 .daily-section {
-  margin-top: 24px;
+  min-width: 0;
+  margin-top: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+  margin-top: 28px;
 }
 
 .daily-forecast-list {
   margin-top: 14px;
-  padding: 0 18px;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--paper);
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .daily-forecast-row {
@@ -774,7 +827,22 @@
   grid-template-columns: minmax(66px, 1fr) 42px 40px minmax(80px, 2fr) 42px;
   align-items: center;
   gap: 10px;
+  padding-inline: 8px;
   border-bottom: 1px solid var(--line);
+  animation: daily-row-in 440ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  transition: background-color 180ms ease;
+}
+
+.daily-forecast-row:hover {
+  background: color-mix(in srgb, var(--paper), var(--green) 5%);
+}
+
+.daily-row-today {
+  background: color-mix(in srgb, var(--paper), var(--green) 7%);
+}
+
+.daily-row-today .daily-row-day {
+  color: var(--green);
 }
 
 .daily-forecast-row:last-child {
@@ -826,13 +894,135 @@
   min-width: 9px;
   border-radius: inherit;
   background: linear-gradient(90deg, #f4b938, #ed7f35);
-  animation: forecast-rise 650ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  transform-origin: left center;
+  animation: daily-range-in 700ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
 .daily-row-high {
   color: var(--ink);
   font-size: 16px;
   text-align: right;
+}
+
+.city-news-section {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+}
+
+.news-search-link {
+  color: #3269c9;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.weather-app[data-theme="dark"] .news-search-link {
+  color: #a5c4ff;
+}
+
+.news-window,
+.news-attribution {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.news-window {
+  margin: 8px 0 0;
+}
+
+.news-scope-fallback {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-style: italic;
+}
+
+.city-profile {
+  padding: 2px 0 15px;
+  border-bottom: 1px solid var(--line);
+}
+
+.city-profile-description {
+  display: block;
+  margin-top: 7px;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.city-profile-extract {
+  display: -webkit-box;
+  margin: 6px 0 8px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.city-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0 2px;
+}
+
+.city-quick-links .news-search-link {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--paper), var(--green) 5%);
+}
+
+.city-news-list {
+  margin-top: 8px;
+}
+
+.city-news-item {
+  display: block;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.city-news-item:last-child {
+  border-bottom: 0;
+}
+
+.city-news-item:hover strong {
+  color: var(--green);
+}
+
+.city-news-source {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.city-news-item strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+  transition: color 150ms ease;
+}
+
+.news-state {
+  min-height: 90px;
+  padding: 16px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.news-attribution {
+  margin: 12px 0 0;
 }
 
 .temperature-bar-column {
@@ -990,12 +1180,52 @@
   to { opacity: 1; transform: scaleY(1); }
 }
 
+@keyframes hourly-card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes daily-row-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes daily-range-in {
+  from { opacity: 0.45; transform: scaleX(0); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes hourly-line-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes hourly-area-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes current-hour-pulse {
+  50% { stroke-width: 4; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .metric,
   .temperature-bar,
-  .daily-temperature-range {
+  .daily-temperature-range,
+  .daily-forecast-row,
+  .daily-range-fill,
+  .hour,
+  .hourly-line,
+  .hourly-line-shadow,
+  .hourly-line-area,
+  .hourly-line-point-current {
     animation: none;
     transition: none;
+  }
+
+  .hourly-line,
+  .hourly-line-shadow {
+    stroke-dashoffset: 0;
   }
 }
 
@@ -1112,8 +1342,19 @@
     grid-template-columns: 1fr;
   }
 
+  .forecast-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .daily-section,
+  .city-news-section {
+    padding: 15px 12px;
+  }
+
   .metric {
-    min-height: 64px;
+    min-height: 82px;
     border-right: 0;
     border-bottom: 0;
   }
@@ -1129,8 +1370,13 @@
   }
 
   .hourly-list {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    min-width: 780px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 0;
+  }
+
+  .hourly-temperature-line {
+    min-width: 780px;
   }
 
   .hour {

@@ -23,11 +23,6 @@ function describeWeather(code) {
   return { label: "Weather conditions", icon: "🌡️" };
 }
 
-function barHeight(value, minimum, maximum) {
-  if (minimum === maximum) return 72;
-  return 30 + ((value - minimum) / (maximum - minimum)) * 60;
-}
-
 function convertTemperature(celsius, unit) {
   return Math.round(unit === "F" ? (celsius * 9) / 5 + 32 : celsius);
 }
@@ -49,6 +44,9 @@ function App() {
   const [cityNews, setCityNews] = useState([]);
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsError, setNewsError] = useState("");
+  const [newsScope, setNewsScope] = useState("city");
+  const [cityInfo, setCityInfo] = useState(null);
+  const [cityInfoLoading, setCityInfoLoading] = useState(false);
 
   useEffect(() => {
     window.localStorage.setItem("fieldnote-theme", theme);
@@ -165,7 +163,7 @@ function App() {
       const params = new URLSearchParams({
         latitude: String(location.latitude),
         longitude: String(location.longitude),
-        current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m",
+        current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,uv_index",
         hourly: "temperature_2m,precipitation_probability,weather_code",
         daily: "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max",
         forecast_days: "7",
@@ -198,25 +196,52 @@ function App() {
     async function loadCityNews() {
       setNewsLoading(true);
       setNewsError("");
-      const searchPhrase = [location.name, location.admin1, location.country].filter(Boolean).join(" ");
-      const params = new URLSearchParams({
-        query: searchPhrase,
-        mode: "ArtList",
-        format: "json",
-        maxrecords: "6",
-        timespan: "7d",
-        sort: "HybridRel",
-      });
+      setCityNews([]);
+      setNewsScope("city");
 
-      try {
+      const searchArticles = async (searchPhrase) => {
+        const params = new URLSearchParams({
+          query: searchPhrase,
+          mode: "ArtList",
+          format: "json",
+          maxrecords: "6",
+          timespan: "30d",
+          sort: "HybridRel",
+        });
         const response = await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?${params}`, {
           signal: controller.signal,
         });
         if (!response.ok) throw new Error("Local headlines are temporarily unavailable.");
         const data = await response.json();
-        const articles = (data.articles ?? []).filter((article) => article.title && article.url);
+        return (data.articles ?? []).filter((article) => article.title && article.url);
+      };
+
+      try {
+        const searchLevels = [
+          { scope: "city", phrase: `${location.name} ${location.country}` },
+          location.admin1 && { scope: "state", phrase: `${location.admin1} ${location.country}` },
+          { scope: "country", phrase: location.country },
+        ].filter((level, index, levels) => level && levels.findIndex((item) => item?.phrase === level.phrase) === index);
+        let articles = [];
+        let lastSearchError;
+
+        for (const level of searchLevels) {
+          try {
+            articles = await searchArticles(level.phrase);
+            if (articles.length > 0) {
+              setNewsScope(level.scope);
+              break;
+            }
+          } catch (error) {
+            if (error.name === "AbortError" || controller.signal.aborted) throw error;
+            lastSearchError = error;
+          }
+        }
+
         setCityNews(articles);
-        if (articles.length === 0) setNewsError(`No recent headlines found for ${location.name}.`);
+        if (articles.length === 0) {
+          setNewsError(lastSearchError?.message || `No recent headlines found for ${location.name}, ${location.admin1 || "the state"}, or ${location.country}.`);
+        }
       } catch (error) {
         if (error.name !== "AbortError" && !controller.signal.aborted) {
           setCityNews([]);
@@ -230,6 +255,37 @@ function App() {
     loadCityNews();
     return () => controller.abort();
   }, [location.name, location.admin1, location.country]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCityInfo() {
+      setCityInfoLoading(true);
+      const pageName = encodeURIComponent(location.name.replaceAll(" ", "_"));
+
+      try {
+        const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${pageName}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("City profile unavailable");
+        const data = await response.json();
+        if (!controller.signal.aborted) {
+          setCityInfo({
+            description: data.description,
+            extract: data.extract,
+            url: data.content_urls?.desktop?.page,
+          });
+        }
+      } catch (error) {
+        if (error.name !== "AbortError" && !controller.signal.aborted) setCityInfo(null);
+      } finally {
+        if (!controller.signal.aborted) setCityInfoLoading(false);
+      }
+    }
+
+    loadCityInfo();
+    return () => controller.abort();
+  }, [location.name]);
 
   const handleSearch = async (event) => {
     event.preventDefault();
@@ -306,7 +362,7 @@ function App() {
   const currentHourIndex = hourly?.time.findIndex((time) => time >= current.time) ?? -1;
   const forecastStart = Math.max(currentHourIndex, 0);
   const nextHours = hourly
-    ? hourly.time.slice(forecastStart, forecastStart + 8).map((time, index) => {
+    ? hourly.time.slice(forecastStart, forecastStart + 12).map((time, index) => {
         const hourIndex = forecastStart + index;
         const hourOfDay = Number(time.slice(11, 13));
         return {
@@ -317,17 +373,58 @@ function App() {
         };
       })
     : [];
+  const currentRainChance = nextHours[0]?.rain ?? 0;
+  const humidityAdvice = !current || loading
+    ? "Updating now"
+    : current.relative_humidity_2m >= 80 && current.temperature_2m >= 37.8
+      ? "Avoid strenuous walks"
+      : current.relative_humidity_2m >= 80
+        ? "Air feels muggy"
+        : current.relative_humidity_2m <= 30
+          ? "Dry air today"
+          : "Comfortable humidity";
+  const windAdvice = !current || loading
+    ? "Updating now"
+    : current.wind_speed_10m >= 50
+      ? "Very windy outdoors"
+      : current.wind_speed_10m >= 30
+        ? "Breezy outside"
+        : "Light winds today";
+  const precipitationAdvice = !current || loading
+    ? "Updating now"
+    : current.precipitation > 0.1
+      ? "Rain falling now"
+      : currentRainChance >= 60
+        ? "Rain likely soon"
+        : currentRainChance >= 25
+          ? "Carry an umbrella"
+          : "Low rain chance";
+  const currentUvIndex = current?.uv_index;
+  const uvAdvice = !current || loading || currentUvIndex == null
+    ? "UV data unavailable"
+    : currentUvIndex >= 11
+      ? "Avoid midday sun"
+      : currentUvIndex >= 8
+        ? "Seek shade outdoors"
+        : currentUvIndex >= 6
+          ? "Use sun protection"
+          : currentUvIndex >= 3
+            ? "Apply sunscreen today"
+            : "Low UV exposure";
   const hourlyTemperatures = nextHours.map((hour) => hour.temperature);
   const hourlyMinimum = Math.min(...hourlyTemperatures);
   const hourlyMaximum = Math.max(...hourlyTemperatures);
   const hourlyLinePoints = nextHours.map((hour, index) => {
-    const horizontalPosition = nextHours.length === 1 ? 500 : 24 + (index * 952) / (nextHours.length - 1);
+    const horizontalPosition = nextHours.length === 1 ? 500 : ((index + 0.5) * 1000) / nextHours.length;
     const verticalPosition = 84 - ((hour.temperature - hourlyMinimum) / (hourlyMaximum - hourlyMinimum || 1)) * 58;
     return { horizontalPosition, verticalPosition };
   });
   const hourlyLinePath = hourlyLinePoints
     .map((point, index) => `${index === 0 ? "M" : "L"}${point.horizontalPosition} ${point.verticalPosition}`)
     .join(" ");
+  const hourlyAreaPath = hourlyLinePoints.length
+    ? `${hourlyLinePath} L ${hourlyLinePoints.at(-1).horizontalPosition} 108 L ${hourlyLinePoints[0].horizontalPosition} 108 Z`
+    : "";
   const daily = weather?.daily;
   const nextSevenDays = daily
     ? daily.time.map((date, index) => ({
@@ -519,22 +616,31 @@ function App() {
             <span className="metric-icon" aria-hidden="true">◌</span>
             <span className="metric-label">Humidity</span>
             <strong>{loading ? "--" : `${current.relative_humidity_2m}%`}</strong>
+            <span className="metric-advice">{humidityAdvice}</span>
           </article>
           <article className="metric metric-wind">
             <span className="metric-icon" aria-hidden="true">↗</span>
             <span className="metric-label">Wind</span>
             <strong>{loading ? "--" : `${Math.round(current.wind_speed_10m)} km/h`}</strong>
+            <span className="metric-advice">{windAdvice}</span>
           </article>
           <article className="metric metric-precipitation">
             <span className="metric-icon" aria-hidden="true">☂</span>
             <span className="metric-label">Precipitation</span>
             <strong>{loading ? "--" : `${current.precipitation} mm`}</strong>
+            <span className="metric-advice">{precipitationAdvice}</span>
+          </article>
+          <article className="metric metric-uv">
+            <span className="metric-icon" aria-hidden="true">☼</span>
+            <span className="metric-label">UV Index</span>
+            <strong>{loading || currentUvIndex == null ? "--" : currentUvIndex.toFixed(1)}</strong>
+            <span className="metric-advice">{uvAdvice}</span>
           </article>
         </section>
 
         <section className="hourly-section" id="outlook">
           <div className="section-heading">
-            <div><p className="eyebrow">TODAY'S OUTLOOK</p><h2>Hourly forecast</h2></div>
+            <div><p className="eyebrow">TODAY'S OUTLOOK</p><h2>12-hour forecast</h2></div>
             <span className="timezone-label">Local time · {weather?.timezone ?? "—"} · °{temperatureUnit}</span>
           </div>
           {weatherError ? (
@@ -546,20 +652,33 @@ function App() {
               </p>
               <div className="hourly-forecast-card">
                 <div className="hourly-list" aria-live="polite">
-                  {loading ? <p className="loading-hours">Loading hourly forecast…</p> : nextHours.map((hour) => (
-                    <article className="hour" key={`${location.name}-${hour.time}`}>
+                  {loading ? <p className="loading-hours">Loading hourly forecast…</p> : nextHours.map((hour, index) => (
+                    <article
+                      className={index === 0 ? "hour hour-current" : "hour"}
+                      key={`${location.name}-${temperatureUnit}-${hour.time}`}
+                      aria-current={index === 0 ? "time" : undefined}
+                      style={{ animationDelay: `${index * 35}ms` }}
+                    >
                       <span className="hour-time">{hour.time}</span>
                       <span className="hour-icon" aria-hidden="true">{hour.icon}</span>
                       <strong>{hour.temperature}°</strong>
+                      <span className="hour-rain">{hour.rain ?? 0}% rain</span>
                     </article>
                   ))}
                 </div>
                 {!loading && (
-                  <svg className="hourly-temperature-line" viewBox="0 0 1000 110" preserveAspectRatio="none" role="img" aria-label={`Hourly temperatures in degrees ${temperatureUnit}`}>
-                    <path className="hourly-line-shadow" d={hourlyLinePath} />
-                    <path className="hourly-line" d={hourlyLinePath} />
+                  <svg key={`${location.name}-${temperatureUnit}`} className="hourly-temperature-line" viewBox="0 0 1000 110" preserveAspectRatio="none" role="img" aria-label={`Hourly temperatures in degrees ${temperatureUnit}`}>
+                    <defs>
+                      <linearGradient id="hourly-area-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#ee8a2f" stopOpacity="0.24" />
+                        <stop offset="100%" stopColor="#ee8a2f" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path className="hourly-line-area" d={hourlyAreaPath} />
+                    <path className="hourly-line-shadow" d={hourlyLinePath} pathLength="1" />
+                    <path className="hourly-line" d={hourlyLinePath} pathLength="1" />
                     {hourlyLinePoints.map((point, index) => (
-                      <circle key={`${location.name}-point-${index}`} className="hourly-line-point" cx={point.horizontalPosition} cy={point.verticalPosition} r={index === 0 ? 5 : 3.5} />
+                      <circle key={`${location.name}-point-${index}`} className={index === 0 ? "hourly-line-point hourly-line-point-current" : "hourly-line-point"} cx={point.horizontalPosition} cy={point.verticalPosition} r={index === 0 ? 5 : 3.5} />
                     ))}
                   </svg>
                 )}
@@ -568,7 +687,8 @@ function App() {
           )}
         </section>
 
-        <section className="daily-section">
+        <div className="forecast-grid">
+          <section className="daily-section">
           <div className="section-heading">
             <div><p className="eyebrow">THE WEEK AHEAD</p><h2>7-day temperature</h2></div>
             <span className="timezone-label">Daily low and high · °{temperatureUnit}</span>
@@ -579,11 +699,16 @@ function App() {
             <p className="loading-hours">Loading 7-day forecast…</p>
           ) : (
             <div className="daily-forecast-list" aria-label="Seven-day forecast">
-              {nextSevenDays.map((day) => {
+              {nextSevenDays.map((day, index) => {
                 const lowPosition = ((day.minimum - dailyMinimum) / (dailyMaximum - dailyMinimum || 1)) * 100;
                 const highPosition = ((day.maximum - dailyMinimum) / (dailyMaximum - dailyMinimum || 1)) * 100;
                 return (
-                  <article className="daily-forecast-row" key={`${location.name}-${day.date}`}>
+                  <article
+                    className={index === 0 ? "daily-forecast-row daily-row-today" : "daily-forecast-row"}
+                    key={`${location.name}-${temperatureUnit}-${day.date}`}
+                    aria-current={index === 0 ? "date" : undefined}
+                    style={{ animationDelay: `${index * 55}ms` }}
+                  >
                     <span className="daily-row-day">{day.day}</span>
                     <div className="daily-row-condition">
                       <span className="daily-row-icon" aria-hidden="true">{day.icon}</span>
@@ -593,7 +718,11 @@ function App() {
                     <div className="daily-range-track" title={`${day.day}: low ${day.minimum}°${temperatureUnit}, high ${day.maximum}°${temperatureUnit}`}>
                       <div
                         className="daily-range-fill"
-                        style={{ left: `${lowPosition}%`, width: `${Math.max(highPosition - lowPosition, 8)}%` }}
+                        style={{
+                          left: `${lowPosition}%`,
+                          width: `${Math.max(highPosition - lowPosition, 8)}%`,
+                          animationDelay: `${index * 55 + 120}ms`,
+                        }}
                       />
                     </div>
                     <strong className="daily-row-high">{day.maximum}°</strong>
@@ -602,7 +731,71 @@ function App() {
               })}
             </div>
           )}
-        </section>
+          </section>
+
+            <section className="city-news-section" aria-label={`${location.name} city brief`}>
+              <div className="section-heading">
+                <div><p className="eyebrow">CITY BRIEF</p><h2>{location.name} guide</h2></div>
+              </div>
+              <div className="city-profile">
+                <span className="city-news-source">ABOUT {location.name.toUpperCase()}</span>
+                {cityInfoLoading ? (
+                  <p className="news-state" role="status">Loading city information…</p>
+                ) : cityInfo?.extract ? (
+                  <>
+                    {cityInfo.description && <strong className="city-profile-description">{cityInfo.description}</strong>}
+                    <p className="city-profile-extract">{cityInfo.extract}</p>
+                    {cityInfo.url && <a className="news-search-link" href={cityInfo.url} target="_blank" rel="noreferrer">Read city profile ↗</a>}
+                  </>
+                ) : (
+                  <p className="news-state">No city profile is available for this location.</p>
+                )}
+              </div>
+
+              <div className="city-quick-links">
+                <a
+                  className="news-search-link"
+                  href={`https://www.google.com/search?q=${encodeURIComponent(`${location.name} ${location.admin1 ?? ""} upcoming events`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Upcoming events ↗
+                </a>
+                <a
+                  className="news-search-link"
+                  href={`https://x.com/search?q=${encodeURIComponent(`${location.name} ${location.admin1 ?? ""}`)}&src=typed_query&f=live`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Live X posts ↗
+                </a>
+              </div>
+
+              <p className="news-window">Recent headlines · past month</p>
+              {!newsLoading && newsScope !== "city" && (
+                <p className="news-scope-fallback">
+                  {newsScope === "state"
+                    ? `No city stories found; showing ${location.admin1} state news instead.`
+                    : `No city or state stories found; showing ${location.country} news instead.`}
+                </p>
+              )}
+              {newsLoading ? (
+                <p className="news-state" role="status">Finding recent stories about {location.name}…</p>
+              ) : newsError ? (
+                <p className="news-state">{newsError}</p>
+              ) : (
+                <div className="city-news-list">
+                  {cityNews.map((article) => (
+                    <a className="city-news-item" href={article.url} key={article.url} target="_blank" rel="noreferrer">
+                      <span className="city-news-source">{article.domain || article.sourcecountry || "Local source"}</span>
+                      <strong>{article.title}</strong>
+                    </a>
+                  ))}
+                </div>
+              )}
+              <p className="news-attribution">Headlines via GDELT · City profile via Wikipedia.</p>
+            </section>
+          </div>
 
         <section className="map-section" id="map">
           <div className="section-heading">
