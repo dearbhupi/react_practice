@@ -28,8 +28,13 @@ function barHeight(value, minimum, maximum) {
   return 30 + ((value - minimum) / (maximum - minimum)) * 60;
 }
 
+function convertTemperature(celsius, unit) {
+  return Math.round(unit === "F" ? (celsius * 9) / 5 + 32 : celsius);
+}
+
 function App() {
   const [theme, setTheme] = useState(() => window.localStorage.getItem("fieldnote-theme") || "light");
+  const [temperatureUnit, setTemperatureUnit] = useState(() => window.localStorage.getItem("fieldnote-temperature-unit") || "C");
   const [now, setNow] = useState(() => new Date());
   const [location, setLocation] = useState(initialLocation);
   const [citySkyline, setCitySkyline] = useState(null);
@@ -41,10 +46,17 @@ function App() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [searchIsSuggestion, setSearchIsSuggestion] = useState(false);
+  const [cityNews, setCityNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(false);
+  const [newsError, setNewsError] = useState("");
 
   useEffect(() => {
     window.localStorage.setItem("fieldnote-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    window.localStorage.setItem("fieldnote-temperature-unit", temperatureUnit);
+  }, [temperatureUnit]);
 
   useEffect(() => {
     const clock = window.setInterval(() => setNow(new Date()), 1000);
@@ -155,7 +167,7 @@ function App() {
         longitude: String(location.longitude),
         current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m",
         hourly: "temperature_2m,precipitation_probability,weather_code",
-        daily: "temperature_2m_max,temperature_2m_min,weather_code",
+        daily: "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max",
         forecast_days: "7",
         timezone: "auto",
       });
@@ -179,6 +191,45 @@ function App() {
     loadWeather();
     return () => controller.abort();
   }, [location]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadCityNews() {
+      setNewsLoading(true);
+      setNewsError("");
+      const searchPhrase = [location.name, location.admin1, location.country].filter(Boolean).join(" ");
+      const params = new URLSearchParams({
+        query: searchPhrase,
+        mode: "ArtList",
+        format: "json",
+        maxrecords: "6",
+        timespan: "7d",
+        sort: "HybridRel",
+      });
+
+      try {
+        const response = await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?${params}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Local headlines are temporarily unavailable.");
+        const data = await response.json();
+        const articles = (data.articles ?? []).filter((article) => article.title && article.url);
+        setCityNews(articles);
+        if (articles.length === 0) setNewsError(`No recent headlines found for ${location.name}.`);
+      } catch (error) {
+        if (error.name !== "AbortError" && !controller.signal.aborted) {
+          setCityNews([]);
+          setNewsError(error.message || "Could not load local headlines.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setNewsLoading(false);
+      }
+    }
+
+    loadCityNews();
+    return () => controller.abort();
+  }, [location.name, location.admin1, location.country]);
 
   const handleSearch = async (event) => {
     event.preventDefault();
@@ -248,15 +299,19 @@ function App() {
   const citySkylineKey = `${location.name}-${location.country}`;
   const currentCitySkyline = citySkyline?.key === citySkylineKey ? citySkyline : null;
   const currentConditions = current ? describeWeather(current.weather_code) : null;
+  const heroWeatherIcon = current?.is_day === 0 && [0, 1, 2].includes(current.weather_code)
+    ? "☾"
+    : currentConditions?.icon ?? "◌";
   const hourly = weather?.hourly;
   const currentHourIndex = hourly?.time.findIndex((time) => time >= current.time) ?? -1;
   const forecastStart = Math.max(currentHourIndex, 0);
   const nextHours = hourly
     ? hourly.time.slice(forecastStart, forecastStart + 8).map((time, index) => {
         const hourIndex = forecastStart + index;
+        const hourOfDay = Number(time.slice(11, 13));
         return {
-          time: time.slice(11, 16),
-          temperature: Math.round(hourly.temperature_2m[hourIndex]),
+          time: index === 0 ? "Now" : `${hourOfDay % 12 || 12}${hourOfDay < 12 ? "AM" : "PM"}`,
+          temperature: convertTemperature(hourly.temperature_2m[hourIndex], temperatureUnit),
           rain: hourly.precipitation_probability[hourIndex],
           icon: describeWeather(hourly.weather_code[hourIndex]).icon,
         };
@@ -265,16 +320,25 @@ function App() {
   const hourlyTemperatures = nextHours.map((hour) => hour.temperature);
   const hourlyMinimum = Math.min(...hourlyTemperatures);
   const hourlyMaximum = Math.max(...hourlyTemperatures);
+  const hourlyLinePoints = nextHours.map((hour, index) => {
+    const horizontalPosition = nextHours.length === 1 ? 500 : 24 + (index * 952) / (nextHours.length - 1);
+    const verticalPosition = 84 - ((hour.temperature - hourlyMinimum) / (hourlyMaximum - hourlyMinimum || 1)) * 58;
+    return { horizontalPosition, verticalPosition };
+  });
+  const hourlyLinePath = hourlyLinePoints
+    .map((point, index) => `${index === 0 ? "M" : "L"}${point.horizontalPosition} ${point.verticalPosition}`)
+    .join(" ");
   const daily = weather?.daily;
   const nextSevenDays = daily
     ? daily.time.map((date, index) => ({
         date,
-        day: new Intl.DateTimeFormat("en", {
+        day: index === 0 ? "Today" : new Intl.DateTimeFormat("en", {
           weekday: "short",
           timeZone: weather.timezone,
         }).format(new Date(`${date}T12:00:00`)),
-        minimum: Math.round(daily.temperature_2m_min[index]),
-        maximum: Math.round(daily.temperature_2m_max[index]),
+        minimum: convertTemperature(daily.temperature_2m_min[index], temperatureUnit),
+        maximum: convertTemperature(daily.temperature_2m_max[index], temperatureUnit),
+        rainChance: Math.round(daily.precipitation_probability_max?.[index] ?? 0),
         icon: describeWeather(daily.weather_code[index]).icon,
       }))
     : [];
@@ -285,8 +349,17 @@ function App() {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    hour12: true,
+    hourCycle: "h23",
   }).formatToParts(now).map(({ type, value }) => [type, value]));
+  const localHour = Number(localTimeParts.hour);
+  const localClockHour = String(localHour % 12 || 12).padStart(2, "0");
+  const localPeriod = localHour === 0
+    ? "Midnight"
+    : localHour < 12
+      ? "Morning"
+      : localHour < 17
+        ? "Afternoon"
+        : "Evening";
   const localDate = new Intl.DateTimeFormat(undefined, {
     timeZone: weather?.timezone ?? "UTC",
     weekday: "long",
@@ -295,7 +368,11 @@ function App() {
   }).format(now);
 
   return (
-    <main className="weather-app" data-theme={theme}>
+    <main
+      className="weather-app"
+      data-theme={theme}
+      data-time-of-day={current ? (current.is_day ? "day" : "night") : "day"}
+    >
       <header className="topbar">
         <a className="brand" href="#top" aria-label="Fieldnote Weather home">
           <span className="brand-mark">F</span>
@@ -303,6 +380,22 @@ function App() {
         </a>
         <div className="topbar-actions">
           <span className="data-note"><span className="live-dot" /> Open-Meteo forecast data</span>
+          <div className="temperature-units" role="group" aria-label="Temperature units">
+            <button
+              type="button"
+              aria-pressed={temperatureUnit === "C"}
+              onClick={() => setTemperatureUnit("C")}
+            >
+              °C
+            </button>
+            <button
+              type="button"
+              aria-pressed={temperatureUnit === "F"}
+              onClick={() => setTemperatureUnit("F")}
+            >
+              °F
+            </button>
+          </div>
           <button
             className="theme-toggle"
             type="button"
@@ -319,19 +412,21 @@ function App() {
       <section className="weather-shell" id="top">
         <div className="page-heading">
           <div>
-            <p className="eyebrow">YOUR LOCAL OUTLOOK</p>
-            <h1>Weather, <em>in focus.</em></h1>
+            <p className="eyebrow">LOCAL FORECAST</p>
+            <h1>{location.name} Weather</h1>
           </div>
           <div className="local-clock" aria-label={`Local time in ${location.name}`}>
             <div className="clock-copy">
               <span className="clock-label">LOCAL TIME · {location.name.toUpperCase()}</span>
               <time className="clock-time" dateTime={now.toISOString()}>
                 <span className="clock-digits">
-                  {current ? `${localTimeParts.hour}:${localTimeParts.minute}:${localTimeParts.second}` : "--:--:--"}
+                  {current ? `${localClockHour}:${localTimeParts.minute}:${localTimeParts.second}` : "--:--:--"}
                 </span>
-                {current && <span className="clock-period">{localTimeParts.dayPeriod}</span>}
               </time>
-              <span className="clock-date">{current ? localDate : "Loading local time"}</span>
+              {current && <span className="clock-period">{localPeriod}</span>}
+              <time className="clock-date" dateTime={now.toISOString()}>
+                {current ? localDate : "Loading local time"}
+              </time>
             </div>
           </div>
         </div>
@@ -370,10 +465,10 @@ function App() {
         )}
 
         <div className="location-line">
-          <span className="pin-icon" aria-hidden="true">⌖</span>
-          <span>{location.name}</span>
-          {location.admin1 && <span className="muted">{location.admin1}</span>}
-          <span className="muted">{location.country}</span>
+          <span>{[location.admin1, location.country].filter(Boolean).join(", ")}</span>
+          <span className="location-separator" aria-hidden="true">·</span>
+          <span>As of {localClockHour}:{localTimeParts.minute} {localPeriod}</span>
+          <a className="location-precision" href="#map">Improve location precision</a>
         </div>
 
         {weatherError && (
@@ -389,21 +484,25 @@ function App() {
           style={currentCitySkyline ? { "--skyline-image": `url("${currentCitySkyline.imageUrl}")` } : undefined}
         >
           <div className="current-main">
-            <div className="condition-icon" aria-hidden="true">{currentConditions?.icon ?? "◌"}</div>
-            <div>
-              <p className="eyebrow">{loading ? "FETCHING CONDITIONS" : currentConditions?.label.toUpperCase()}</p>
+            <div className="current-temperature-copy">
               <div className="temperature">
-                {loading ? "--" : Math.round(current?.temperature_2m)}<span>°</span>
+                {loading ? "--" : convertTemperature(current?.temperature_2m, temperatureUnit)}<span>°{temperatureUnit}</span>
               </div>
-              <p className="feels-like">
-                {loading ? "Connecting to forecast service" : `Feels like ${Math.round(current.apparent_temperature)}°C`}
+              <p className="hero-weather-details">
+                <span>Feels like <strong>{loading ? "--" : `${convertTemperature(current.apparent_temperature, temperatureUnit)}°`}</strong></span>
+                <span>High <strong>{nextSevenDays[0]?.maximum ?? "--"}°</strong></span>
+                <span>Low <strong>{nextSevenDays[0]?.minimum ?? "--"}°</strong></span>
+              </p>
+              <p className="hero-rain-details">
+                Chance of rain <strong>{nextHours[0]?.rain ?? 0}%</strong>
+                <span aria-hidden="true">·</span>
+                <strong>{loading ? "--" : `${current.precipitation} mm`}</strong> precipitation
               </p>
             </div>
           </div>
           <div className="condition-summary">
-            <span className="summary-label">RIGHT NOW</span>
-            <span className="summary-text">{loading ? "Loading the latest model data" : currentConditions?.label}</span>
-            <span className="summary-time">{current?.time ? `Forecast observation · ${current.time.slice(11, 16)}` : ""}</span>
+            <div className="condition-icon" aria-hidden="true">{heroWeatherIcon}</div>
+            <span className="summary-text">{loading ? "Loading" : currentConditions?.label}</span>
           </div>
         </section>
         {currentCitySkyline && (
@@ -416,45 +515,55 @@ function App() {
         )}
 
         <section className="metrics" aria-label="Current weather details">
-          <article className="metric"><span className="metric-icon">◌</span><span className="metric-label">Humidity</span><strong>{loading ? "--" : `${current.relative_humidity_2m}%`}</strong></article>
-          <article className="metric"><span className="metric-icon">↗</span><span className="metric-label">Wind</span><strong>{loading ? "--" : `${Math.round(current.wind_speed_10m)} km/h`}</strong></article>
-          <article className="metric"><span className="metric-icon">☂</span><span className="metric-label">Precipitation</span><strong>{loading ? "--" : `${current.precipitation} mm`}</strong></article>
+          <article className="metric metric-humidity">
+            <span className="metric-icon" aria-hidden="true">◌</span>
+            <span className="metric-label">Humidity</span>
+            <strong>{loading ? "--" : `${current.relative_humidity_2m}%`}</strong>
+          </article>
+          <article className="metric metric-wind">
+            <span className="metric-icon" aria-hidden="true">↗</span>
+            <span className="metric-label">Wind</span>
+            <strong>{loading ? "--" : `${Math.round(current.wind_speed_10m)} km/h`}</strong>
+          </article>
+          <article className="metric metric-precipitation">
+            <span className="metric-icon" aria-hidden="true">☂</span>
+            <span className="metric-label">Precipitation</span>
+            <strong>{loading ? "--" : `${current.precipitation} mm`}</strong>
+          </article>
         </section>
 
-        <section className="hourly-section">
+        <section className="hourly-section" id="outlook">
           <div className="section-heading">
-            <div><p className="eyebrow">PLAN THE NEXT FEW HOURS</p><h2>Hourly outlook</h2></div>
-            <span className="timezone-label">Local time · {weather?.timezone ?? "—"}</span>
+            <div><p className="eyebrow">TODAY'S OUTLOOK</p><h2>Hourly forecast</h2></div>
+            <span className="timezone-label">Local time · {weather?.timezone ?? "—"} · °{temperatureUnit}</span>
           </div>
           {weatherError ? (
             <p className="inline-message">Hourly forecast is unavailable.</p>
           ) : (
             <>
-              <div className="temperature-chart hourly-chart" aria-label="Hourly temperature bar chart">
-                {loading ? <p className="loading-hours">Loading hourly temperatures…</p> : nextHours.map((hour) => (
-                  <div className="temperature-bar-column" key={`bar-${location.name}-${hour.time}`}>
-                    <span className="temperature-bar-value">{hour.temperature}°</span>
-                    <div className="temperature-bar-track">
-                      <div
-                        className="temperature-bar hourly-temperature-bar"
-                        style={{ height: `${barHeight(hour.temperature, hourlyMinimum, hourlyMaximum)}%` }}
-                        title={`${hour.time}: ${hour.temperature}°C`}
-                      />
-                    </div>
-                    <span className="temperature-bar-label">{hour.time}</span>
-                  </div>
-                ))}
+              <p className="outlook-summary">
+                Today's high is {nextSevenDays[0]?.maximum ?? "--"}°, with a low of {nextSevenDays[0]?.minimum ?? "--"}°. Rain chance in the next hour: {nextHours[0]?.rain ?? 0}%.
+              </p>
+              <div className="hourly-forecast-card">
+                <div className="hourly-list" aria-live="polite">
+                  {loading ? <p className="loading-hours">Loading hourly forecast…</p> : nextHours.map((hour) => (
+                    <article className="hour" key={`${location.name}-${hour.time}`}>
+                      <span className="hour-time">{hour.time}</span>
+                      <span className="hour-icon" aria-hidden="true">{hour.icon}</span>
+                      <strong>{hour.temperature}°</strong>
+                    </article>
+                  ))}
+                </div>
+                {!loading && (
+                  <svg className="hourly-temperature-line" viewBox="0 0 1000 110" preserveAspectRatio="none" role="img" aria-label={`Hourly temperatures in degrees ${temperatureUnit}`}>
+                    <path className="hourly-line-shadow" d={hourlyLinePath} />
+                    <path className="hourly-line" d={hourlyLinePath} />
+                    {hourlyLinePoints.map((point, index) => (
+                      <circle key={`${location.name}-point-${index}`} className="hourly-line-point" cx={point.horizontalPosition} cy={point.verticalPosition} r={index === 0 ? 5 : 3.5} />
+                    ))}
+                  </svg>
+                )}
               </div>
-            <div className="hourly-list" aria-live="polite">
-              {loading ? <p className="loading-hours">Loading hourly forecast…</p> : nextHours.map((hour) => (
-                <article className="hour" key={`${location.name}-${hour.time}`}>
-                  <span className="hour-time">{hour.time}</span>
-                  <span className="hour-icon" aria-hidden="true">{hour.icon}</span>
-                  <strong>{hour.temperature}°</strong>
-                  <span className="rain-chance">{hour.rain ?? 0}% rain</span>
-                </article>
-              ))}
-            </div>
             </>
           )}
         </section>
@@ -462,29 +571,32 @@ function App() {
         <section className="daily-section">
           <div className="section-heading">
             <div><p className="eyebrow">THE WEEK AHEAD</p><h2>7-day temperature</h2></div>
-            <span className="timezone-label">Daily low and high · °C</span>
+            <span className="timezone-label">Daily low and high · °{temperatureUnit}</span>
           </div>
           {weatherError ? (
             <p className="inline-message">Daily forecast is unavailable.</p>
           ) : loading ? (
             <p className="loading-hours">Loading 7-day forecast…</p>
           ) : (
-            <div className="daily-chart" aria-label="Seven-day minimum and maximum temperature chart">
+            <div className="daily-forecast-list" aria-label="Seven-day forecast">
               {nextSevenDays.map((day) => {
                 const lowPosition = ((day.minimum - dailyMinimum) / (dailyMaximum - dailyMinimum || 1)) * 100;
                 const highPosition = ((day.maximum - dailyMinimum) / (dailyMaximum - dailyMinimum || 1)) * 100;
                 return (
-                  <article className="daily-bar-column" key={`${location.name}-${day.date}`}>
-                    <span className="daily-bar-icon" aria-hidden="true">{day.icon}</span>
-                    <div className="daily-bar-track" title={`${day.day}: low ${day.minimum}°C, high ${day.maximum}°C`}>
+                  <article className="daily-forecast-row" key={`${location.name}-${day.date}`}>
+                    <span className="daily-row-day">{day.day}</span>
+                    <div className="daily-row-condition">
+                      <span className="daily-row-icon" aria-hidden="true">{day.icon}</span>
+                      {day.rainChance > 0 && <span className="daily-rain-chance">{day.rainChance}%</span>}
+                    </div>
+                    <span className="daily-row-low">{day.minimum}°</span>
+                    <div className="daily-range-track" title={`${day.day}: low ${day.minimum}°${temperatureUnit}, high ${day.maximum}°${temperatureUnit}`}>
                       <div
-                        className="daily-temperature-range"
-                        style={{ bottom: `${lowPosition}%`, height: `${Math.max(highPosition - lowPosition, 8)}%` }}
+                        className="daily-range-fill"
+                        style={{ left: `${lowPosition}%`, width: `${Math.max(highPosition - lowPosition, 8)}%` }}
                       />
                     </div>
-                    <strong className="daily-high">{day.maximum}°</strong>
-                    <span className="daily-low">{day.minimum}°</span>
-                    <span className="daily-bar-label">{day.day}</span>
+                    <strong className="daily-row-high">{day.maximum}°</strong>
                   </article>
                 );
               })}
@@ -492,7 +604,7 @@ function App() {
           )}
         </section>
 
-        <section className="map-section">
+        <section className="map-section" id="map">
           <div className="section-heading">
             <div><p className="eyebrow">EXPLORE THE AREA</p><h2>Location map</h2></div>
             <a
