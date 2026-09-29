@@ -7,6 +7,8 @@ import BankingUseEffectDemo from '../allHooks/use-effect_BankingDemo.jsx'
 import WeatherWithUseEffect from '../allHooks/WeatherWithUseEffect.jsx'
 import WeatherWithoutUseEffect from '../allHooks/WeatherWithoutUseEffect.jsx'
 import WeatherCodeComparison from '../allHooks/WeatherCodeComparison.jsx'
+import UseEffectDependenciesDemo from '../allHooks/UseEffectDependenciesDemo.jsx'
+import UseEffectCleanupWeatherDemo from '../allHooks/UseEffectCleanupWeatherDemo.jsx'
 import UseEffectGame from '../allHooks/use-effect_Game.jsx'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -38,6 +40,8 @@ createRoot(document.getElementById('root')).render(
     <WeatherWithUseEffect />
     <WeatherWithoutUseEffect />
     <WeatherCodeComparison />
+    <UseEffectDependenciesDemo />
+    <UseEffectCleanupWeatherDemo />
 
 
 
