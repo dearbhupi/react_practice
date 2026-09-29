@@ -272,3 +272,34 @@ console.log(slicedArray); // Output: [1.5, 2]
 const splicedArray = numbers.splice(1, 2);
 console.log(splicedArray); // Output: [1.5, 2]
 console.log(numbers); // Output: [0, 6, 7]  
+
+// spread operator in array
+const spreadArray = [...numbers];
+console.log(spreadArray); // Output: [0, 6, 7]
+
+// rest operator in array
+const [first, ...rest] = numbers;
+console.log(first); // Output: 0
+console.log(rest); // Output: [6, 7]
+
+// spread operator in objects
+const obj1 = { a: 1, b: 2 };
+const obj2 = { ...obj1, c: 3 };
+console.log(obj2); // Output: { a: 1, b: 2, c: 3 }
+
+// rest operator in objects
+const { a, ...restObj } = obj2;
+console.log(a); // Output: 1
+console.log(restObj); // Output: { b: 2, c: 3 }
+ 
+// merge two array with spread operator
+const array1 = [1, 2, 3];
+const array2 = [4, 5, 6];
+const mergedArray = [...array1, ...array2];
+console.log(mergedArray); // Output: [1, 2, 3, 4, 5, 6]
+
+// merge two objects with spread operator
+const object1 = { x: 10, y: 20 };
+const object2 = { z: 30 };
+const mergedObject = { ...object1, ...object2 };
+console.log(mergedObject); // Output: { x: 10, y: 20, z: 30 }
