@@ -10,17 +10,17 @@ const initialLocation = {
 };
 
 function describeWeather(code) {
-  if (code === 0) return { label: "Clear sky", icon: "☀️" };
-  if (code === 1) return { label: "Mainly clear", icon: "🌤️" };
-  if (code === 2) return { label: "Partly cloudy", icon: "⛅" };
-  if (code === 3) return { label: "Overcast", icon: "☁️" };
-  if ([45, 48].includes(code)) return { label: "Fog", icon: "🌫️" };
-  if ([51, 53, 55, 56, 57].includes(code)) return { label: "Drizzle", icon: "🌦️" };
-  if ([61, 63, 65, 66, 67].includes(code)) return { label: "Rain", icon: "🌧️" };
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return { label: "Snow", icon: "❄️" };
-  if ([80, 81, 82].includes(code)) return { label: "Rain showers", icon: "🌦️" };
-  if ([95, 96, 99].includes(code)) return { label: "Thunderstorm", icon: "⛈️" };
-  return { label: "Weather conditions", icon: "🌡️" };
+  if (code === 0) return { label: "Clear sky", icon: "☀️", motion: "sun" };
+  if (code === 1) return { label: "Mainly clear", icon: "🌤️", motion: "sun" };
+  if (code === 2) return { label: "Partly cloudy", icon: "⛅", motion: "partly-cloudy" };
+  if (code === 3) return { label: "Overcast", icon: "☁️", motion: "cloud" };
+  if ([45, 48].includes(code)) return { label: "Fog", icon: "🌫️", motion: "fog" };
+  if ([51, 53, 55, 56, 57].includes(code)) return { label: "Drizzle", icon: "🌦️", motion: "rain" };
+  if ([61, 63, 65, 66, 67].includes(code)) return { label: "Rain", icon: "🌧️", motion: "rain" };
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return { label: "Snow", icon: "❄️", motion: "snow" };
+  if ([80, 81, 82].includes(code)) return { label: "Rain showers", icon: "🌦️", motion: "rain" };
+  if ([95, 96, 99].includes(code)) return { label: "Thunderstorm", icon: "⛈️", motion: "storm" };
+  return { label: "Weather conditions", icon: "🌡️", motion: "default" };
 }
 
 function convertTemperature(celsius, unit) {
@@ -45,8 +45,6 @@ function App() {
   const [newsLoading, setNewsLoading] = useState(false);
   const [newsError, setNewsError] = useState("");
   const [newsScope, setNewsScope] = useState("city");
-  const [cityInfo, setCityInfo] = useState(null);
-  const [cityInfoLoading, setCityInfoLoading] = useState(false);
 
   useEffect(() => {
     window.localStorage.setItem("fieldnote-theme", theme);
@@ -201,7 +199,7 @@ function App() {
 
       const searchArticles = async (searchPhrase) => {
         const params = new URLSearchParams({
-          query: searchPhrase,
+          query: `${searchPhrase} sourcelang:english`,
           mode: "ArtList",
           format: "json",
           maxrecords: "6",
@@ -213,7 +211,9 @@ function App() {
         });
         if (!response.ok) throw new Error("Local headlines are temporarily unavailable.");
         const data = await response.json();
-        return (data.articles ?? []).filter((article) => article.title && article.url);
+        return (data.articles ?? []).filter((article) =>
+          article.title && article.url && article.language?.toLowerCase() === "english",
+        );
       };
 
       try {
@@ -255,37 +255,6 @@ function App() {
     loadCityNews();
     return () => controller.abort();
   }, [location.name, location.admin1, location.country]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadCityInfo() {
-      setCityInfoLoading(true);
-      const pageName = encodeURIComponent(location.name.replaceAll(" ", "_"));
-
-      try {
-        const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${pageName}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error("City profile unavailable");
-        const data = await response.json();
-        if (!controller.signal.aborted) {
-          setCityInfo({
-            description: data.description,
-            extract: data.extract,
-            url: data.content_urls?.desktop?.page,
-          });
-        }
-      } catch (error) {
-        if (error.name !== "AbortError" && !controller.signal.aborted) setCityInfo(null);
-      } finally {
-        if (!controller.signal.aborted) setCityInfoLoading(false);
-      }
-    }
-
-    loadCityInfo();
-    return () => controller.abort();
-  }, [location.name]);
 
   const handleSearch = async (event) => {
     event.preventDefault();
@@ -358,6 +327,9 @@ function App() {
   const heroWeatherIcon = current?.is_day === 0 && [0, 1, 2].includes(current.weather_code)
     ? "☾"
     : currentConditions?.icon ?? "◌";
+  const heroWeatherMotion = current?.is_day === 0 && [0, 1, 2].includes(current.weather_code)
+    ? "moon"
+    : currentConditions?.motion ?? "default";
   const hourly = weather?.hourly;
   const currentHourIndex = hourly?.time.findIndex((time) => time >= current.time) ?? -1;
   const forecastStart = Math.max(currentHourIndex, 0);
@@ -370,6 +342,7 @@ function App() {
           temperature: convertTemperature(hourly.temperature_2m[hourIndex], temperatureUnit),
           rain: hourly.precipitation_probability[hourIndex],
           icon: describeWeather(hourly.weather_code[hourIndex]).icon,
+          motion: describeWeather(hourly.weather_code[hourIndex]).motion,
         };
       })
     : [];
@@ -598,7 +571,9 @@ function App() {
             </div>
           </div>
           <div className="condition-summary">
-            <div className="condition-icon" aria-hidden="true">{heroWeatherIcon}</div>
+            <div className="condition-icon" aria-hidden="true">
+              <span className={`weather-symbol motion-${heroWeatherMotion}`}>{heroWeatherIcon}</span>
+            </div>
             <span className="summary-text">{loading ? "Loading" : currentConditions?.label}</span>
           </div>
         </section>
@@ -660,9 +635,11 @@ function App() {
                       style={{ animationDelay: `${index * 35}ms` }}
                     >
                       <span className="hour-time">{hour.time}</span>
-                      <span className="hour-icon" aria-hidden="true">{hour.icon}</span>
+                      <span className={`hour-icon weather-symbol motion-${hour.motion}`} aria-hidden="true">{hour.icon}</span>
                       <strong>{hour.temperature}°</strong>
-                      <span className="hour-rain">{hour.rain ?? 0}% rain</span>
+                      <span className="hour-rain" aria-label={`${hour.rain ?? 0}% chance of rain`}>
+                        {hour.rain ?? 0}%
+                      </span>
                     </article>
                   ))}
                 </div>
@@ -733,42 +710,9 @@ function App() {
           )}
           </section>
 
-            <section className="city-news-section" aria-label={`${location.name} city brief`}>
+            <section className="city-news-section" aria-label={`Latest headlines near ${location.name}`}>
               <div className="section-heading">
-                <div><p className="eyebrow">CITY BRIEF</p><h2>{location.name} guide</h2></div>
-              </div>
-              <div className="city-profile">
-                <span className="city-news-source">ABOUT {location.name.toUpperCase()}</span>
-                {cityInfoLoading ? (
-                  <p className="news-state" role="status">Loading city information…</p>
-                ) : cityInfo?.extract ? (
-                  <>
-                    {cityInfo.description && <strong className="city-profile-description">{cityInfo.description}</strong>}
-                    <p className="city-profile-extract">{cityInfo.extract}</p>
-                    {cityInfo.url && <a className="news-search-link" href={cityInfo.url} target="_blank" rel="noreferrer">Read city profile ↗</a>}
-                  </>
-                ) : (
-                  <p className="news-state">No city profile is available for this location.</p>
-                )}
-              </div>
-
-              <div className="city-quick-links">
-                <a
-                  className="news-search-link"
-                  href={`https://www.google.com/search?q=${encodeURIComponent(`${location.name} ${location.admin1 ?? ""} upcoming events`)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Upcoming events ↗
-                </a>
-                <a
-                  className="news-search-link"
-                  href={`https://x.com/search?q=${encodeURIComponent(`${location.name} ${location.admin1 ?? ""}`)}&src=typed_query&f=live`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Live X posts ↗
-                </a>
+                <div><p className="eyebrow">LOCAL COVERAGE</p><h2>Latest near {location.name}</h2></div>
               </div>
 
               <p className="news-window">Recent headlines · past month</p>
@@ -793,7 +737,7 @@ function App() {
                   ))}
                 </div>
               )}
-              <p className="news-attribution">Headlines via GDELT · City profile via Wikipedia.</p>
+              <p className="news-attribution">Public headlines via GDELT · Past 30 days</p>
             </section>
           </div>
 
