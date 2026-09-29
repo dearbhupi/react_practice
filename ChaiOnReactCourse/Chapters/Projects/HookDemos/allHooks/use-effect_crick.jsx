@@ -8,38 +8,38 @@ const players = [
 ];
 
 function UseEffectCricket() {
-    const [score, setScore] = useState(0); // Total team score
-    const [out, setOut] = useState(0);    // Total outs / current player index
+    const [playerScore, setPlayerScore] = useState(0); // Total team score
+    const [playerout, setPlayerOut] = useState(0);    // Total outs / current player index
 
     useEffect(() => {
-        if (out < players.length) {
-            console.log(`Current player: ${players[out]}`);
+        if (playerout < players.length) {
+            console.log(`Current player: ${players[playerout]}`);
         } else {
             console.log("All players are out!");
         }
-    }, [out]);
+    }, [playerout]);
 
     // Reset game state
     const handleRestart = () => {
-        setScore(0);
-        setOut(0);
+        setPlayerScore(0);
+        setPlayerOut(0);
     };
 
     // Display current player or Game Over message
-    const currentPlayerName = out < players.length-1 ? players[out] : "Game Over - All Out!";
+    const currentPlayerName = playerout < players.length-1 ? players[playerout] : "Game Over - All Out!";
 
     return (
         <div>
-            <p>Team (Score): {score}/{out}</p>
+            <p>Team (Score/out): {playerScore}/{playerout}</p>
             
             {/* H1 displays current player name */}
             <h1>{currentPlayerName}</h1>
             
-            <button onClick={() => setScore(score + 1)}>TeamScore</button>
+            <button onClick={() => setPlayerScore(playerScore + 1)}>TeamScore</button>
             
             <button 
-                onClick={() => setOut(out + 1)}
-                disabled={out >= players.length}
+                onClick={() => setPlayerOut(playerout + 1)}
+                disabled={playerout >= players.length}
             >
                 PlayerOut
             </button>

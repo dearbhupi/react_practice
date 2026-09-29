@@ -21,7 +21,8 @@ import ApiDataFetcher from '../allHooks/use-effectwithAPI.jsx'
 import UseDarkModeApp from '../allHooks/use-Context.jsx'
 import UseContextvsuseEffect from '../allHooks/use-contextvsuseEffect.jsx'
 import UseContextAppAPI from '../allHooks/use-context_apiEx.jsx'
-import UseEffectCricket from '../allHooks/use-effect_demo.jsx'
+import UseEffectCricket from '../allHooks/use-effect_crick.jsx'
+import UseEffectCricketMatch from '../allHooks/use-effect_Criket.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -45,6 +46,7 @@ createRoot(document.getElementById('root')).render(
     <UseEffectDependenciesDemo />
     <UseEffectCleanupWeatherDemo />
     <UseEffectCricket />
+    <UseEffectCricketMatch/>
 
 
 
