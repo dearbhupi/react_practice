@@ -61,16 +61,17 @@ function WeatherDisplay({ selectedCity, result }) {
         </>
       )}
       {isStale && (
-        <p style={{ color: "#b45309", fontWeight: "bold" }}>
-          This result is out of date. The selected city and weather do not match.
-        </p>
+        <div style={{ marginTop: 12, padding: 12, color: "#991b1b", background: "#fee2e2", border: "2px solid #dc2626", borderRadius: 6, fontWeight: "bold" }}>
+          STALE WEATHER: you selected {selectedCity}, but the old {result.city}
+          response arrived last and replaced the correct result.
+        </div>
       )}
     </div>
   );
 }
 
 function WithCleanupPanel() {
-  const [city, setCity] = useState("Tokyo");
+  const [city, setCity] = useState("Paris");
   const [result, setResult] = useState(null);
   const [raceId, setRaceId] = useState(0);
 
@@ -104,7 +105,7 @@ function WithCleanupPanel() {
 }
 
 function WithoutCleanupPanel() {
-  const [city, setCity] = useState("Tokyo");
+  const [city, setCity] = useState("Paris");
   const [result, setResult] = useState(null);
   const [raceId, setRaceId] = useState(0);
 
