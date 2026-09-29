@@ -32,7 +32,7 @@ function App() {
   const [theme, setTheme] = useState(() => window.localStorage.getItem("fieldnote-theme") || "light");
   const [now, setNow] = useState(() => new Date());
   const [location, setLocation] = useState(initialLocation);
-  const [landmark, setLandmark] = useState(null);
+  const [citySkyline, setCitySkyline] = useState(null);
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [weatherError, setWeatherError] = useState("");
@@ -52,44 +52,94 @@ function App() {
 
   useEffect(() => {
     const controller = new AbortController();
-    const params = new URLSearchParams({
-      action: "query",
-      generator: "search",
-      gsrsearch: `${location.name} ${location.country} landmark`,
-      gsrnamespace: "6",
-      gsrlimit: "1",
-      prop: "imageinfo",
-      iiprop: "url",
-      iiurlwidth: "1800",
-      format: "json",
-      origin: "*",
-    });
 
-    async function loadLandmark() {
+    async function loadCitySkyline() {
       try {
-        const response = await fetch(`https://commons.wikimedia.org/w/api.php?${params}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error("Landmark image search failed");
+        const searchImages = async (searchTerm) => {
+          const params = new URLSearchParams({
+            action: "query",
+            generator: "search",
+            gsrsearch: searchTerm,
+            gsrnamespace: "6",
+            gsrlimit: "10",
+            prop: "imageinfo",
+            iiprop: "url",
+            iiurlwidth: "1800",
+            format: "json",
+            origin: "*",
+          });
+          const response = await fetch(`https://commons.wikimedia.org/w/api.php?${params}`, {
+            signal: controller.signal,
+          });
+          if (!response.ok) throw new Error("City image search failed");
+          const data = await response.json();
+          return Object.values(data.query?.pages ?? {}).filter((item) => item.imageinfo?.[0]);
+        };
 
-        const data = await response.json();
-        const page = Object.values(data.query?.pages ?? {}).find((item) => item.imageinfo?.[0]);
+        const skylineScore = (title) => {
+          const normalizedTitle = title.toLowerCase();
+          return ["skyline", "cityscape", "panorama", "panoramic", "skyscraper", "high-rise", "downtown"].reduce(
+            (score, keyword) => score + (normalizedTitle.includes(keyword) ? 1 : 0),
+            0,
+          );
+        };
+
+        const cityTerms = [location.name, location.admin1, location.country].filter(Boolean);
+        const skylineSearches = [
+          `${location.name} ${location.admin1 ?? ""} skyline`,
+          `${location.name} ${location.country} skyline`,
+          `${location.name} skyline`,
+          `${location.name} cityscape`,
+        ];
+        let pages = [];
+
+        for (const searchTerm of skylineSearches) {
+          const results = await searchImages(searchTerm);
+          const matches = results.filter((item) => skylineScore(item.title) > 0);
+          if (matches.length > 0) {
+            pages = matches;
+            break;
+          }
+          if (pages.length === 0) pages = results;
+        }
+
+        let imageType = "City skyline";
+        if (pages.length === 0 || !pages.some((item) => skylineScore(item.title) > 0)) {
+          imageType = "City landmark";
+          const landmarkSearches = [
+            `${location.name} ${location.admin1 ?? ""} landmark`,
+            `${location.name} ${location.country} landmark architecture`,
+            `${location.name} landmark`,
+          ];
+          for (const searchTerm of landmarkSearches) {
+            const results = await searchImages(searchTerm);
+            if (results.length > 0) {
+              pages = results;
+              break;
+            }
+          }
+        }
+
+        const page = pages.sort((first, second) => skylineScore(second.title) - skylineScore(first.title))[0];
         const imageInfo = page?.imageinfo?.[0];
 
         if (!controller.signal.aborted && imageInfo) {
-          setLandmark({
-            key: `${location.name}-${location.country}`,
+          setCitySkyline({
+            key: `${location.name}-${cityTerms.at(-1)}`,
             imageUrl: imageInfo.thumburl ?? imageInfo.url,
             sourceUrl: imageInfo.descriptionurl,
             title: page.title,
+            imageType,
           });
+        } else if (!controller.signal.aborted) {
+          setCitySkyline(null);
         }
       } catch (error) {
-        if (error.name !== "AbortError") setLandmark(null);
+        if (error.name !== "AbortError") setCitySkyline(null);
       }
     }
 
-    loadLandmark();
+    loadCitySkyline();
     return () => controller.abort();
   }, [location.name, location.country]);
 
@@ -168,8 +218,8 @@ function App() {
   };
 
   const current = weather?.current;
-  const landmarkKey = `${location.name}-${location.country}`;
-  const currentLandmark = landmark?.key === landmarkKey ? landmark : null;
+  const citySkylineKey = `${location.name}-${location.country}`;
+  const currentCitySkyline = citySkyline?.key === citySkylineKey ? citySkyline : null;
   const currentConditions = current ? describeWeather(current.weather_code) : null;
   const hourly = weather?.hourly;
   const currentHourIndex = hourly?.time.findIndex((time) => time >= current.time) ?? -1;
@@ -286,7 +336,7 @@ function App() {
         <section
           className="current-weather"
           aria-live="polite"
-          style={currentLandmark ? { "--landmark-image": `url("${currentLandmark.imageUrl}")` } : undefined}
+          style={currentCitySkyline ? { "--skyline-image": `url("${currentCitySkyline.imageUrl}")` } : undefined}
         >
           <div className="current-main">
             <div className="condition-icon" aria-hidden="true">{currentConditions?.icon ?? "◌"}</div>
@@ -306,10 +356,10 @@ function App() {
             <span className="summary-time">{current?.time ? `Forecast observation · ${current.time.slice(11, 16)}` : ""}</span>
           </div>
         </section>
-        {currentLandmark && (
-          <p className="landmark-caption">
-            Landmark image: {currentLandmark.title.replace("File:", "")} ·{" "}
-            <a href={currentLandmark.sourceUrl} target="_blank" rel="noreferrer">
+        {currentCitySkyline && (
+          <p className="skyline-caption">
+            {currentCitySkyline.imageType}: {currentCitySkyline.title.replace("File:", "")} ·{" "}
+            <a href={currentCitySkyline.sourceUrl} target="_blank" rel="noreferrer">
               View source and license
             </a>
           </p>

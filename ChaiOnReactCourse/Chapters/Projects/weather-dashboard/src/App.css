@@ -325,7 +325,7 @@
   background-color: #254e3a;
   background-image:
     linear-gradient(90deg, rgb(16 31 24 / 88%) 0%, rgb(21 42 31 / 72%) 48%, rgb(21 42 31 / 36%) 100%),
-    var(--landmark-image, linear-gradient(112deg, #254e3a 0%, #2d6246 58%, #456b4b 100%));
+    var(--skyline-image, linear-gradient(112deg, #254e3a 0%, #2d6246 58%, #456b4b 100%));
   background-position: center;
   background-size: cover;
 }
@@ -386,14 +386,14 @@
   border-left: 1px solid rgb(255 255 255 / 25%);
 }
 
-.landmark-caption {
+.skyline-caption {
   margin: 8px 2px 0;
   color: var(--muted);
   font-size: 10px;
   text-align: right;
 }
 
-.landmark-caption a {
+.skyline-caption a {
   color: var(--green);
 }
 
