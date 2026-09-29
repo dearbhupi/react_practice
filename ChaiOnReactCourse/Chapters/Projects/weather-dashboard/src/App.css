@@ -96,7 +96,6 @@
 .brand-light,
 .data-note,
 .muted,
-.updated-note,
 .timezone-label {
   color: var(--muted);
   font-weight: 400;
@@ -156,9 +155,60 @@
   font-weight: 500;
 }
 
-.updated-note {
-  margin: 0 0 4px;
-  font-size: 12px;
+.local-clock {
+  display: flex;
+  width: 286px;
+  min-width: 286px;
+  height: 84px;
+  flex: 0 0 286px;
+  align-items: center;
+  padding: 10px 0;
+  background: transparent;
+}
+
+.clock-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.clock-label {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.clock-time {
+  display: flex;
+  width: 12ch;
+  min-width: 12ch;
+  align-items: baseline;
+  gap: 3px;
+  color: var(--ink);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 32px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.clock-digits {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-period {
+  width: 3ch;
+  flex: 0 0 3ch;
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.clock-date {
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .search-form {
@@ -193,9 +243,15 @@
   font-size: 14px;
 }
 
+.search-box input:focus-visible {
+  outline: none;
+}
+
 .search-box:focus-within {
   border-color: #548268;
-  box-shadow: 0 0 0 3px rgb(84 130 104 / 12%);
+  outline: 2px solid #548268;
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .search-button,
@@ -719,8 +775,16 @@
     font-size: 36px;
   }
 
-  .updated-note {
-    font-size: 10px;
+  .local-clock {
+    min-width: 0;
+    width: 100%;
+    height: 80px;
+    flex-basis: 100%;
+    padding: 9px 12px;
+  }
+
+  .clock-time {
+    font-size: 28px;
   }
 
   .search-form {

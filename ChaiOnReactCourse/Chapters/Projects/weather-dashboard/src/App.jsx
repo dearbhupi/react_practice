@@ -40,6 +40,7 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [searchIsSuggestion, setSearchIsSuggestion] = useState(false);
 
   useEffect(() => {
     window.localStorage.setItem("fieldnote-theme", theme);
@@ -187,6 +188,7 @@ function App() {
     setSearchLoading(true);
     setSearchError("");
     setSearchResults([]);
+    setSearchIsSuggestion(false);
 
     try {
       const params = new URLSearchParams({ name: searchTerm, count: "5", language: "en", format: "json" });
@@ -194,7 +196,32 @@ function App() {
       if (!response.ok) throw new Error("City search is unavailable. Please try again.");
       const data = await response.json();
       if (!data.results?.length) {
-        setSearchError("No matching cities found. Try a different spelling.");
+        const suggestionParams = new URLSearchParams({ q: searchTerm, limit: "5", lang: "en" });
+        const suggestionResponse = await fetch(`https://photon.komoot.io/api/?${suggestionParams}`);
+        if (!suggestionResponse.ok) throw new Error("Similar city search is unavailable. Please try again.");
+
+        const suggestionData = await suggestionResponse.json();
+        const suggestions = (suggestionData.features ?? [])
+          .filter((feature) => feature.properties?.name && feature.geometry?.coordinates?.length === 2)
+          .map((feature, index) => {
+            const [longitude, latitude] = feature.geometry.coordinates;
+            const properties = feature.properties;
+            return {
+              id: `photon-${properties.osm_type}-${properties.osm_id ?? index}`,
+              name: properties.city ?? properties.name,
+              admin1: properties.state ?? properties.county,
+              country: properties.country,
+              latitude,
+              longitude,
+            };
+          });
+
+        if (suggestions.length) {
+          setSearchResults(suggestions);
+          setSearchIsSuggestion(true);
+        } else {
+          setSearchError("No similar cities found. Check the spelling and try again.");
+        }
       } else {
         setSearchResults(data.results);
       }
@@ -253,10 +280,18 @@ function App() {
     : [];
   const dailyMinimum = Math.min(...nextSevenDays.map((day) => day.minimum));
   const dailyMaximum = Math.max(...nextSevenDays.map((day) => day.maximum));
-  const localTimestamp = new Intl.DateTimeFormat(undefined, {
+  const localTimeParts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
     timeZone: weather?.timezone ?? "UTC",
-    dateStyle: "medium",
-    timeStyle: "medium",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  }).formatToParts(now).map(({ type, value }) => [type, value]));
+  const localDate = new Intl.DateTimeFormat(undefined, {
+    timeZone: weather?.timezone ?? "UTC",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
   }).format(now);
 
   return (
@@ -287,9 +322,18 @@ function App() {
             <p className="eyebrow">YOUR LOCAL OUTLOOK</p>
             <h1>Weather, <em>in focus.</em></h1>
           </div>
-          <p className="updated-note">
-            {current ? `Local time · ${localTimestamp}` : "Current conditions and the hours ahead"}
-          </p>
+          <div className="local-clock" aria-label={`Local time in ${location.name}`}>
+            <div className="clock-copy">
+              <span className="clock-label">LOCAL TIME · {location.name.toUpperCase()}</span>
+              <time className="clock-time" dateTime={now.toISOString()}>
+                <span className="clock-digits">
+                  {current ? `${localTimeParts.hour}:${localTimeParts.minute}:${localTimeParts.second}` : "--:--:--"}
+                </span>
+                {current && <span className="clock-period">{localTimeParts.dayPeriod}</span>}
+              </time>
+              <span className="clock-date">{current ? localDate : "Loading local time"}</span>
+            </div>
+          </div>
         </div>
 
         <form className="search-form" onSubmit={handleSearch}>
@@ -309,13 +353,19 @@ function App() {
 
         {searchError && <p className="inline-message error-message" role="alert">{searchError}</p>}
         {searchResults.length > 0 && (
-          <div className="search-results" aria-label="City search results">
-            {searchResults.map((place) => (
-              <button className="result-row" key={`${place.id}-${place.latitude}`} onClick={() => selectLocation(place)} type="button">
-                <span>{place.name}<small>{[place.admin1, place.country].filter(Boolean).join(", ")}</small></span>
-                <span aria-hidden="true">↗</span>
-              </button>
-            ))}
+          <div>
+            {searchIsSuggestion && (
+              <p className="inline-message">No exact city match. Did you mean one of these?</p>
+            )}
+            <div className="search-results" aria-label={searchIsSuggestion ? "Similar city suggestions" : "City search results"}>
+              {searchResults.map((place) => (
+                <button className="result-row" key={`${place.id}-${place.latitude}`} onClick={() => selectLocation(place)} type="button">
+                  <span>{place.name}<small>{[place.admin1, place.country].filter(Boolean).join(", ")}</small></span>
+                  <span aria-hidden="true">↗</span>
+                </button>
+              ))}
+            </div>
+            {searchIsSuggestion && <p className="inline-message">Suggestions powered by Photon and OpenStreetMap.</p>}
           </div>
         )}
 
