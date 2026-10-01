@@ -46,3 +46,51 @@ DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipe
 
 DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle deploy -t dev && DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle run credit_pipeline -t dev
 
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview get 01f1bda6e8ef1597b2dbd26bc573ade4 -o json | jq -r '.serialized_dashboard'
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines get-update 93468fab-75cc-4170-9e46-f81afd145387 cc4eaf2b-8e87-4457-9fa0-97c8b27cfc7f -o json | jq '.update | {state, cause}'; DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines get-update bb06e552-a0e1-4cfe-bafd-813f1413f775 c315ec11-fae1-48de-81b9-419c86725271 -o json | jq '.update | {state, cause}'
+
+
+$HOME/.local/bin/databricks lakeview update --help
+serialized_dashboard=$(DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview get 01f1bda6e8ef1597b2dbd26bc573ade4 -o json | jq -r '.serialized_dashboard' | jq -c '
+  .datasets[0].queryLines = ["SELECT CAST(order_date AS STRING) AS order_date, revenue, order_count, customer_count FROM workspace.default.gold_daily_sales ORDER BY order_date"]
+  | .pages[0].layout |= map(if .widget.name == "sales_daily_table" then (.widget.spec.encodings.columns[0].type = "string" | .widget.spec.encodings.columns[0].displayAs = "string" | .widget.spec.encodings.columns[0].alignContent = "left" | .widget.spec.encodings.columns[0] |= del(.numberFormat)) else . end)
+') && DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview update 01f1bda6e8ef1597b2dbd26bc573ade4 --dataset-catalog workspace --dataset-schema default --warehouse-id 3a4041986a3b0bce --serialized-dashboard "$serialized_dashboard" -o json && DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview publish 01f1bda6e8ef1597b2dbd26bc573ade4 --warehouse-id 3a4041986a3b0bce -o json
+
+
+
+$HOME/.local/bin/databricks api post --help
+
+
+
+statement="CREATE TABLE IF NOT EXISTS workspace.default.fieldnote_sales_source AS SELECT date_sub(current_date(), CAST(day_offset AS INT)) AS order_date, CAST(revenue AS DECIMAL(18, 2)) AS revenue, CAST(order_count AS INT) AS order_count, CAST(customer_count AS INT) AS customer_count FROM VALUES (6, 1840.0, 18, 18), (5, 2360.0, 23, 23), (4, 1980.0, 20, 20), (3, 3120.0, 29, 29), (2, 2750.0, 26, 26), (1, 3580.0, 34, 34), (0, 4210.0, 39, 39) AS sales(day_offset, revenue, order_count, customer_count)"; request=$(jq -nc --arg warehouse_id 3a4041986a3b0bce --arg statement "$statement" '{warehouse_id: $warehouse_id, statement: $statement, wait_timeout: "50s", on_wait_timeout: "CONTINUE"}'); DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" api post /api/2.0/sql/statements --json "$request" -o json | jq '{statement_id, status: .status.state, error: .status.error.message}'
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle validate -t dev && DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle deploy -t dev && DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle run sales_pipeline -t dev
+
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" warehouses stop 3a4041986a3b0bce
+
+
+
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle run sales_pipeline -t dev
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines get-update 93468fab-75cc-4170-9e46-f81afd145387 1a73365a-e1f6-4938-95a2-11ee088a1d73 -o json | jq '.update | {state, cause}'
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines get-update 93468fab-75cc-4170-9e46-f81afd145387 1a73365a-e1f6-4938-95a2-11ee088a1d73 -o json | jq '.update | {state, cause}'
+
+
+.venv/bin/python -m pytest -q && npm --prefix /Users/bhupi/learnREACT/Databrick_E2E_project/client run lint && npm --prefix /Users/bhupi/learnREACT/Databrick_E2E_project/client run build && DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle validate -t dev
+
+
+
+DATABRICKS_BUNDLE_ROOT=/Users/bhupi/learnREACT/Databrick_E2E_project/databrick DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle validate -t dev
+
+
+PYTHONPATH=/Users/bhupi/learnREACT/Databrick_E2E_project/backend_server /Users/bhupi/learnREACT/Databrick_E2E_project/backend_server/.venv/bin/python -c 'from app.settings import Settings; s=Settings(_env_file="/Users/bhupi/learnREACT/Databrick_E2E_project/backend_server/.env.example"); assert s.databricks_server_hostname == "dbc-05835634-9c28.cloud.databricks.com"; assert s.databricks_http_path == "/sql/1.0/warehouses/3a4041986a3b0bce"; print("Workspace endpoint settings parse correctly")'
+
+

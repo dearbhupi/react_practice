@@ -12,8 +12,8 @@ variables:
     description: Unity Catalog schema for pipeline output
     default: default
   source_table:
-    description: Three-part source table containing TPC-H-style orders
-    default: samples.tpch.orders
+    description: Three-part table with daily sales metrics
+    default: workspace.default.fieldnote_sales_source
   credit_source_table:
     description: Three-part source table containing German credit applications
     default: workspace.default.german_credit_data

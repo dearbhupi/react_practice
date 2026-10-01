@@ -34,8 +34,8 @@ Open the Vite URL shown in the terminal (normally `http://localhost:5173`). The 
 ## Connect Databricks
 
 1. Install and authenticate the Databricks CLI for a workspace with Unity Catalog and serverless pipeline support.
-2. Review `databrick/databricks.yml`. The credit pipeline reads `workspace.default.german_credit_data` with `Age`, `Sex`, `Job`, `Housing`, `Saving accounts`, `Checking account`, `Credit amount`, `Duration`, `Purpose`, and `Risk` columns. It intentionally excludes age and sex from the Silver and Gold analysis tables. Override `credit_source_table` if needed. The separate sales pipeline still defaults to `samples.tpch.orders`.
-3. Deploy and run the pipelines:
+2. Review `databrick/databricks.yml`. The sales pipeline reads the normalized daily data in `workspace.default.fieldnote_sales_source`; the included seven-day rows match the React demo figures. The credit pipeline reads `workspace.default.german_credit_data` with `Age`, `Sex`, `Job`, `Housing`, `Saving accounts`, `Checking account`, `Credit amount`, `Duration`, `Purpose`, and `Risk` columns. It intentionally excludes age and sex from the Silver and Gold analysis tables. Override `credit_source_table` if needed.
+3. Run `databrick/seed_sales.sql` in the Databricks SQL Editor to create the sales source table, then deploy and run the pipelines:
 
 ```sh
 cd databrick
@@ -46,6 +46,8 @@ databricks bundle run credit_pipeline -t dev
 ```
 
 The pipelines write Gold tables to `workspace.default` by default. The credit pipeline creates `gold_credit_summary`, `gold_credit_by_purpose`, and `gold_credit_by_duration`. Change the catalog/schema bundle variables and matching API table settings together if you use another output location.
+
+The published [Sales Overview dashboard](https://dbc-05835634-9c28.cloud.databricks.com/dashboardsv3/01f1bda6e8ef1597b2dbd26bc573ade4/published?o=2163847751496363) reads from `workspace.default.gold_daily_sales`. The existing German credit dashboard is unchanged.
 
 4. Configure `backend_server/.env` with the SQL warehouse's server hostname, HTTP path, and an access token. Set:
 
