@@ -1,0 +1,17 @@
+# JavaScript
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Local configuration and credentials
+.env
+.env.*.local
+
+# Databricks bundle state
+.databricks/

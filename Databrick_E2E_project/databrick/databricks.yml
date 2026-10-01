@@ -1,0 +1,21 @@
+bundle:
+  name: fieldnote-sales-analytics
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for pipeline output
+    default: main
+  schema:
+    description: Unity Catalog schema for pipeline output
+    default: e2e_analytics
+  source_table:
+    description: Three-part source table containing TPC-H-style orders
+    default: samples.tpch.orders
+
+targets:
+  dev:
+    mode: development
+    default: true

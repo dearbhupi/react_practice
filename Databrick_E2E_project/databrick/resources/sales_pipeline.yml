@@ -1,0 +1,15 @@
+resources:
+  pipelines:
+    sales_pipeline:
+      name: fieldnote-sales-pipeline
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      development: true
+      channel: CURRENT
+      continuous: false
+      libraries:
+        - notebook:
+            path: ../src/pipeline.py
+      configuration:
+        source_table: ${var.source_table}
