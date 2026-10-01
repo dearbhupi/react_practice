@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from .credit_analysis import get_credit_analysis
 from .dashboard import get_dashboard_data
 from .settings import get_settings
 
@@ -33,3 +34,12 @@ def dashboard(days: Annotated[int, Query(ge=1, le=90)] = 7) -> dict:
     except Exception as error:
         logger.exception("Dashboard data request failed")
         raise HTTPException(status_code=503, detail="Unable to load dashboard data") from error
+
+
+@app.get("/api/v1/credit-analysis")
+def credit_analysis() -> dict:
+    try:
+        return get_credit_analysis()
+    except Exception as error:
+        logger.exception("Credit analysis request failed")
+        raise HTTPException(status_code=503, detail="Unable to load credit analysis") from error

@@ -13,3 +13,17 @@ resources:
             path: ../src/pipeline.py
       configuration:
         source_table: ${var.source_table}
+
+  credit_pipeline:
+    name: fieldnote-credit-analysis-pipeline
+    catalog: ${var.catalog}
+    schema: ${var.schema}
+    serverless: true
+    development: true
+    channel: CURRENT
+    continuous: false
+    libraries:
+      - notebook:
+          path: ../src/credit_pipeline.py
+    configuration:
+      credit_source_table: ${var.credit_source_table}

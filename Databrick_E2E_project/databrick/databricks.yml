@@ -14,6 +14,9 @@ variables:
   source_table:
     description: Three-part source table containing TPC-H-style orders
     default: samples.tpch.orders
+  credit_source_table:
+    description: Three-part source table containing German credit applications
+    default: workspace.default.german_credit_data
 
 targets:
   dev:
