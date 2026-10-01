@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CreditAnalysis from './CreditAnalysis.jsx'
 import './App.css'
 
 const currency = new Intl.NumberFormat('en-US', {
@@ -14,12 +15,24 @@ function formatDate(value) {
 }
 
 function App() {
+  const [activePage, setActivePage] = useState(() =>
+    window.location.hash === '#credit-analysis' ? 'credit-analysis' : 'overview',
+  )
   const [dashboard, setDashboard] = useState(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
+    function syncPage() {
+      setActivePage(window.location.hash === '#credit-analysis' ? 'credit-analysis' : 'overview')
+    }
+    window.addEventListener('hashchange', syncPage)
+    return () => window.removeEventListener('hashchange', syncPage)
+  }, [])
+
+  useEffect(() => {
+    if (activePage !== 'overview') return
     const controller = new AbortController()
 
     async function loadDashboard() {
@@ -38,7 +51,7 @@ function App() {
 
     loadDashboard()
     return () => controller.abort()
-  }, [refreshKey])
+  }, [activePage, refreshKey])
 
   const series = dashboard?.series ?? []
   const maxRevenue = Math.max(...series.map((day) => day.revenue), 1)
@@ -51,8 +64,11 @@ function App() {
           <span>fieldnote</span>
         </a>
         <div className="workspace-label">WORKSPACE</div>
-        <a className="nav-link active" href="#overview">
-          <span className="nav-glyph" aria-hidden="true">▦</span> Overview
+        <a className={`nav-link ${activePage === 'overview' ? 'active' : ''}`} href="#overview" title="Sales overview">
+          <span className="nav-glyph" aria-hidden="true">▦</span> Sales overview
+        </a>
+        <a className={`nav-link ${activePage === 'credit-analysis' ? 'active' : ''}`} href="#credit-analysis" title="Credit analysis">
+          <span className="nav-glyph" aria-hidden="true">◷</span> Credit analysis
         </a>
         <div className="sidebar-bottom">
           <span className="status-dot" />
@@ -61,30 +77,31 @@ function App() {
         </div>
       </aside>
 
-      <main className="main-content" id="overview">
+      <main className="main-content" id={activePage}>
         <header className="topbar">
-          <div className="breadcrumb">Workspace <span>/</span> Sales overview</div>
-          <div className="topbar-meta"><span className="live-dot" /> Pipeline monitor</div>
+          <div className="breadcrumb">Workspace <span>/</span> {activePage === 'overview' ? 'Sales overview' : 'Credit analysis'}</div>
+          <div className="topbar-meta"><span className="live-dot" /> Data pipeline</div>
         </header>
 
         <section className="page-heading">
           <div>
-            <p className="eyebrow">BUSINESS INTELLIGENCE <span>•</span> LAST 7 DAYS</p>
-            <h1>Sales overview</h1>
-            <p className="subheading">A clear view of your latest sales performance.</p>
+            <p className="eyebrow">{activePage === 'overview' ? 'BUSINESS INTELLIGENCE • LAST 7 DAYS' : 'GERMAN CREDIT DATA • HISTORICAL LABELS'}</p>
+            <h1>{activePage === 'overview' ? 'Sales overview' : 'Credit analysis'}</h1>
+            <p className="subheading">{activePage === 'overview' ? 'A clear view of your latest sales performance.' : 'Descriptive patterns in historical credit outcomes.'}</p>
           </div>
-          <button className="refresh-button" type="button" onClick={() => setRefreshKey((key) => key + 1)} disabled={isLoading}>
-            <span aria-hidden="true">↻</span> {isLoading ? 'Refreshing' : 'Refresh data'}
+          <button className="refresh-button" type="button" onClick={() => setRefreshKey((key) => key + 1)} disabled={activePage === 'overview' && isLoading}>
+            <span aria-hidden="true">↻</span> {activePage === 'overview' && isLoading ? 'Refreshing' : 'Refresh data'}
           </button>
         </section>
 
-        {error && (
+        {activePage === 'overview' && error && (
           <div className="error-banner" role="alert">
             <span>{error}. Check that the FastAPI server is running.</span>
             <button type="button" onClick={() => setRefreshKey((key) => key + 1)}>Retry</button>
           </div>
         )}
 
+        {activePage === 'credit-analysis' ? <CreditAnalysis refreshKey={refreshKey} /> : <>
         <section className="metrics-grid" aria-label="Sales summary">
           <article className="metric-panel revenue-panel">
             <div className="metric-topline"><span>Gross revenue</span><span className="metric-icon">↗</span></div>
@@ -130,6 +147,7 @@ function App() {
             <span>{dashboard?.updated_at ? `Updated ${new Date(dashboard.updated_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'Waiting for data'}</span>
           </footer>
         </section>
+        </>}
 
         <footer className="page-footer">Fieldnote <span>•</span> Analytics workspace</footer>
       </main>

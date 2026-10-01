@@ -51,6 +51,34 @@ h1 { font-family: 'DM Serif Display', serif; font-size: 38px; line-height: 1.1; 
 .legend-swatch { width: 9px; height: 9px; border-radius: 2px; background: var(--green); }
 .page-footer { padding-top: 21px; color: #98a29a; font-size: 10px; }
 .page-footer span { padding: 0 5px; color: #d8794a; }
+.credit-disclaimer { margin: 0 0 16px; padding: 12px 15px; border-left: 3px solid #d8794a; background: #fff7ef; color: #765640; font-size: 11px; line-height: 1.5; }
+.credit-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.credit-metric { min-height: 115px; box-sizing: border-box; padding: 16px 17px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
+.credit-metric span { display: block; color: #718077; font-size: 10px; font-weight: 600; }
+.credit-metric strong { display: block; margin-top: 12px; color: var(--ink); font-size: 24px; font-weight: 600; line-height: 1.1; }
+.credit-analysis-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 1fr); gap: 14px; margin-top: 15px; }
+.credit-panel { min-width: 0; padding: 20px 21px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
+.credit-panel-heading { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 19px; }
+.credit-panel-heading h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
+.credit-panel-heading > span { color: #89958c; font-size: 10px; }
+.risk-list { display: grid; gap: 16px; }
+.risk-row { min-width: 0; }
+.risk-row-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; font-size: 11px; }
+.risk-purpose { overflow: hidden; color: #39483f; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize; }
+.risk-value { flex: 0 0 auto; color: #77837a; font-variant-numeric: tabular-nums; }
+.risk-track { height: 8px; overflow: hidden; border-radius: 2px; background: #eaf0ea; }
+.risk-fill { height: 100%; min-width: 2px; border-radius: 2px; background: #d8794a; }
+.risk-row-meta { display: flex; justify-content: space-between; margin-top: 5px; color: #9aa39c; font-size: 9px; }
+.duration-list { display: grid; gap: 0; }
+.duration-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 13px 0; border-bottom: 1px solid #edf0ec; }
+.duration-row:first-child { padding-top: 0; }
+.duration-row:last-child { padding-bottom: 0; border-bottom: 0; }
+.duration-name { color: #39483f; font-size: 11px; font-weight: 600; }
+.duration-rate { color: #b85f3c; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.duration-count { grid-column: 1 / -1; color: #929c95; font-size: 9px; }
+.credit-source { display: flex; justify-content: end; margin-top: 12px; color: #929c95; font-size: 10px; }
+.credit-loading { min-height: 210px; display: grid; place-items: center; color: var(--muted); font-size: 12px; }
+.credit-error { margin-bottom: 14px; }
 @keyframes rise-in { from { transform: scaleY(.1); } to { transform: scaleY(1); } }
 
 @media (max-width: 900px) {
@@ -65,7 +93,8 @@ h1 { font-family: 'DM Serif Display', serif; font-size: 38px; line-height: 1.1; 
   .app-shell { display: block; }
   .sidebar { position: static; height: 62px; flex-direction: row; align-items: center; justify-content: space-between; padding: 0 18px; }
   .workspace-label, .sidebar-bottom { display: none; }
-  .nav-link { min-height: 34px; padding-inline: 10px; font-size: 12px; }
+  .nav-link { min-height: 34px; gap: 0; padding-inline: 8px; font-size: 0; }
+  .nav-glyph { font-size: 18px; }
   .main-content { padding: 0 18px 24px; }
   .topbar { height: 54px; }
   .topbar-meta { font-size: 0; }
@@ -83,4 +112,9 @@ h1 { font-family: 'DM Serif Display', serif; font-size: 38px; line-height: 1.1; 
   .bar-value { font-size: 8px; }
   .bar-label { font-size: 9px; }
   .chart-placeholder { height: 202px; }
+  .credit-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .credit-metric { min-height: 100px; padding: 13px; }
+  .credit-metric strong { font-size: 20px; }
+  .credit-analysis-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+  .credit-panel { padding: 17px 15px; }
 }

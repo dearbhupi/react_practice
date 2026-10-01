@@ -6,7 +6,7 @@ A small end-to-end example with a React dashboard, a FastAPI service, and a Data
 
 - `client/` - React and Vite dashboard
 - `backend_server/` - FastAPI routes, demo provider, Databricks SQL client, and tests
-- `databrick/` - Databricks Asset Bundle and Bronze/Silver/Gold pipeline
+- `databrick/` - Databricks Asset Bundle and sales plus credit Bronze/Silver/Gold pipelines
 
 ## Run locally with demo data
 
@@ -34,23 +34,27 @@ Open the Vite URL shown in the terminal (normally `http://localhost:5173`). The 
 ## Connect Databricks
 
 1. Install and authenticate the Databricks CLI for a workspace with Unity Catalog and serverless pipeline support.
-2. Review `databrick/databricks.yml`. The default input is Databricks' `samples.tpch.orders`; override `source_table` if you use a different table with the TPC-H order columns `o_orderdate`, `o_orderkey`, `o_custkey`, and `o_totalprice`.
-3. Deploy and run the pipeline:
+2. Review `databrick/databricks.yml`. The credit pipeline reads `workspace.default.german_credit_data` with `Age`, `Sex`, `Job`, `Housing`, `Saving accounts`, `Checking account`, `Credit amount`, `Duration`, `Purpose`, and `Risk` columns. It intentionally excludes age and sex from the Silver and Gold analysis tables. Override `credit_source_table` if needed. The separate sales pipeline still defaults to `samples.tpch.orders`.
+3. Deploy and run the pipelines:
 
 ```sh
 cd databrick
 databricks bundle validate -t dev
 databricks bundle deploy -t dev
 databricks bundle run sales_pipeline -t dev
+databricks bundle run credit_pipeline -t dev
 ```
 
-The pipeline writes `main.e2e_analytics.gold_daily_sales` by default. The catalog and schema can be changed with bundle variables; keep the API table setting in sync.
+The pipelines write Gold tables to `workspace.default` by default. The credit pipeline creates `gold_credit_summary`, `gold_credit_by_purpose`, and `gold_credit_by_duration`. Change the catalog/schema bundle variables and matching API table settings together if you use another output location.
 
 4. Configure `backend_server/.env` with the SQL warehouse's server hostname, HTTP path, and an access token. Set:
 
 ```dotenv
 DATA_SOURCE=databricks
-DATABRICKS_GOLD_TABLE=main.e2e_analytics.gold_daily_sales
+DATABRICKS_GOLD_TABLE=workspace.default.gold_daily_sales
+DATABRICKS_CREDIT_SUMMARY_TABLE=workspace.default.gold_credit_summary
+DATABRICKS_CREDIT_PURPOSE_TABLE=workspace.default.gold_credit_by_purpose
+DATABRICKS_CREDIT_DURATION_TABLE=workspace.default.gold_credit_by_duration
 ```
 
 `DATABRICKS_WORKSPACE_ID` is recorded in `backend_server/.env.example` as a workspace reference. The value `aws:us-east-2:e2b7f0e7-1acb-4276-8c00-72bdc52c5bbf` is not a workspace URL or SQL warehouse HTTP path; obtain those separately from the Databricks workspace. The token is read only by the backend. Do not put Databricks credentials in the React client or commit `.env`.
@@ -59,6 +63,7 @@ DATABRICKS_GOLD_TABLE=main.e2e_analytics.gold_daily_sales
 
 - `GET /health` reports API health and the configured data source.
 - `GET /api/v1/dashboard?days=7` returns summary metrics and daily sales rows. `days` accepts values from 1 through 90.
+- `GET /api/v1/credit-analysis` returns historical label rates by purpose and duration; it is descriptive analysis, not a lending decision model.
 
 Run backend tests:
 

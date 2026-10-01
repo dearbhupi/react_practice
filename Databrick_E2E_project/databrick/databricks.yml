@@ -7,10 +7,10 @@ include:
 variables:
   catalog:
     description: Unity Catalog catalog for pipeline output
-    default: main
+    default: workspace
   schema:
     description: Unity Catalog schema for pipeline output
-    default: e2e_analytics
+    default: default
   source_table:
     description: Three-part source table containing TPC-H-style orders
     default: samples.tpch.orders
