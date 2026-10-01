@@ -1,3 +1,4 @@
+# Databricks notebook source
 import pyspark.pipelines as dp
 from pyspark.sql import functions as F
 
@@ -11,7 +12,22 @@ credit_source_table = spark.conf.get(
     comment="Raw German credit applications from the configured source table",
 )
 def bronze_credit_applications():
-    return spark.read.table(credit_source_table)
+    source = spark.read.table(credit_source_table)
+    source_columns = {
+        "Age": "age",
+        "Sex": "sex",
+        "Job": "job",
+        "Housing": "housing",
+        "Saving accounts": "saving_accounts",
+        "Checking account": "checking_account",
+        "Credit amount": "credit_amount",
+        "Duration": "duration",
+        "Purpose": "purpose",
+        "Risk": "risk",
+    }
+    return source.select(
+        *(F.col(source_name).alias(target_name) for source_name, target_name in source_columns.items())
+    )
 
 
 @dp.table(
@@ -22,10 +38,10 @@ def silver_credit_applications():
     source = dp.read("bronze_credit_applications")
     return (
         source.select(
-            F.col("Credit amount").cast("double").alias("credit_amount"),
-            F.col("Duration").cast("int").alias("duration"),
-            F.lower(F.trim(F.col("Purpose"))).alias("purpose"),
-            F.lower(F.trim(F.col("Risk"))).alias("risk"),
+            F.col("credit_amount").cast("double").alias("credit_amount"),
+            F.col("duration").cast("int").alias("duration"),
+            F.lower(F.trim(F.col("purpose"))).alias("purpose"),
+            F.lower(F.trim(F.col("risk"))).alias("risk"),
         )
         .filter(
             (F.col("credit_amount") > 0)

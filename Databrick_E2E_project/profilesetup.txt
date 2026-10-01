@@ -1,0 +1,48 @@
+$HOME/.local/bin/databricks lakeview create --help
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines get-update 93468fab-75cc-4170-9e46-f81afd145387 cc4eaf2b-8e87-4457-9fa0-97c8b27cfc7f -o json | jq '.update | {state, cause, error}'; DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" warehouses list -o json | jq '.warehouses[] | {id, name, state}'
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" warehouses list -o json | jq 'if type == "array" then map({id, name, state}) else . end'
+
+
+$HOME/.local/bin/databricks lakeview get --help && $HOME/.local/bin/databricks lakeview publish --help
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview get 01f0ba058c991cebad5b931a7d75fe67 -o json | jq '{display_name, warehouse_id, serialized_dashboard}'
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview get 01f0ba058c991cebad5b931a7d75fe67 -o json | jq '.serialized_dashboard | fromjson | {datasets, pages: [.pages[] | {name, displayName, widgets: [.layout[].widget | {name, queries, spec}]}]}'
+
+
+serialized_dashboard=$(DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview get 01f0ba058c991cebad5b931a7d75fe67 -o json | jq -r '.serialized_dashboard' | jq -c '
+  . as $root
+  | ($root.pages[0].layout[] | select(.widget.name == "table1").widget) as $table
+  | ($root.pages[0].layout[] | select(.widget.name == "text_box1").widget) as $note
+  | $root
+
+
+  DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview publish 01f1bda6e8ef1597b2dbd26bc573ade4 --warehouse-id 3a4041986a3b0bce -o json
+
+  DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" lakeview get-published 01f1bda6e8ef1597b2dbd26bc573ade4 -o json | jq '{dashboard_id, display_name, warehouse_id, embed_credentials, path}'
+
+  DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle run credit_pipeline -t dev
+
+
+  DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle validate -t dev
+
+  DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines get-update bb06e552-a0e1-4cfe-bafd-813f1413f775 fb0d5532-96ba-4fd6-bfe3-fb334e66d9d3 -o json | jq '.update | {state, cause, error}'
+
+
+  DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines get-update bb06e552-a0e1-4cfe-bafd-813f1413f775 fb0d5532-96ba-4fd6-bfe3-fb334e66d9d3 -o json | jq '.update | keys'
+
+  $HOME/.local/bin/databricks pipelines events list --help
+
+  DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines list-pipeline-events bb06e552-a0e1-4cfe-bafd-813f1413f775 --max-results 30 -o json | jq '.events[] | {timestamp, level, message, details, error}'
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" pipelines list-pipeline-events bb06e552-a0e1-4cfe-bafd-813f1413f775 --max-results 30 -o json | jq 'if type == "array" then .[0] else keys end'
+
+
+DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle deploy -t dev && DATABRICKS_CONFIG_PROFILE=fieldnote-workspace "$HOME/.local/bin/databricks" bundle run credit_pipeline -t dev
+
