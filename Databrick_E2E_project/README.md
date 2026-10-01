@@ -1,4 +1,4 @@
-# Fieldnote Sales Analytics
+# SinghInt LLC Sales Analytics
 
 A small end-to-end example with a React dashboard, a FastAPI service, and a Databricks Lakeflow Declarative Pipeline. The API serves demo data by default; switching it to Databricks makes it query the pipeline's Unity Catalog Gold table through a SQL warehouse.
 

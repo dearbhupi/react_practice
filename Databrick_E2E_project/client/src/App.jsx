@@ -59,9 +59,9 @@ function App() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <a className="brand" href="#overview" aria-label="Fieldnote home">
-          <span className="brand-mark">F</span>
-          <span>fieldnote</span>
+        <a className="brand" href="#overview" aria-label="SinghInt LLC home">
+          <span className="brand-mark">SI</span>
+          <span>SinghInt LLC</span>
         </a>
         <div className="workspace-label">WORKSPACE</div>
         <a className={`nav-link ${activePage === 'overview' ? 'active' : ''}`} href="#overview" title="Sales overview">
@@ -149,7 +149,7 @@ function App() {
         </section>
         </>}
 
-        <footer className="page-footer">Fieldnote <span>•</span> Analytics workspace</footer>
+        <footer className="page-footer">SinghInt LLC <span>•</span> Analytics workspace</footer>
       </main>
     </div>
   )

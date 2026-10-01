@@ -95,3 +95,9 @@ PYTHONPATH=/Users/bhupi/learnREACT/Databrick_E2E_project/backend_server /Users/b
 
 
 perl -pe 'if (/-----BEGIN .*PRIVATE KEY-----/ .. /-----END .*PRIVATE KEY-----/) { $_ = "[REDACTED PRIVATE KEY BLOCK]\n"; next } s/(--(?:token|password|secret)\s+)[^\s]+/$1[REDACTED]/ig; s/((?:access[_-]?token|client[_-]?secret|password|passwd|secret|authorization)\s*[=:]\s*["\x27]?)[^\s,\x27"}]+/$1[REDACTED]/ig; s/(Bearer\s+)\S+/$1[REDACTED]/ig; s/\bdapi[[:alnum:]]{16,}\b/[REDACTED_DATABRICKS_TOKEN]/ig; s/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/[REDACTED_JWT]/g; s/([?&](?:token|code|state)=)[^&\s]+/$1[REDACTED]/ig; s/\b[A-Za-z0-9_-]{48,}\b/[REDACTED_LONG_VALUE]/g' /Users/bhupi/learnREACT/Databrick_E2E_project/profilesetup.txt
+
+
+
+
+perl -pe 'if (/-----BEGIN .*PRIVATE KEY-----/ .. /-----END .*PRIVATE KEY-----/) { $_ = "[REDACTED PRIVATE KEY BLOCK]\n"; next } s/(--(?:token|password|secret)\s+)[^\s]+/$1[REDACTED]/ig; s/((?:access[_-]?token|client[_-]?secret|password|passwd|secret|authorization)\s*[=:]\s*["\x27]?)[^\s,\x27"}]+/$1[REDACTED]/ig; s/(Bearer\s+)\S+/$1[REDACTED]/ig; s/\bdapi[[:alnum:]]{16,}\b/[REDACTED_DATABRICKS_TOKEN]/ig; s/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/[REDACTED_JWT]/g; s/([?&](?:token|code|state)=)[^&\s]+/$1[REDACTED]/ig; s/\b[A-Za-z0-9_-]{48,}\b/[REDACTED_LONG_VALUE]/g' /Users/bhupi/learnREACT/Databrick_E2E_project/profilesetup.txt
+

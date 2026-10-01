@@ -1,4 +1,4 @@
-# End-to-End React, FastAPI, and Databricks Replication Guide
+# SinghInt LLC: React, FastAPI, and Databricks Replication Guide
 
 This runbook documents the project setup from an empty directory through the local React/FastAPI app, Databricks pipelines, SQL source table, and published Lakeview Sales Overview dashboard. It also records the workspace-specific commands used for this deployment. Replace workspace IDs, URLs, catalog/schema names, source tables, and dashboard IDs when reproducing it elsewhere. Never copy an access token into this file, React code, shell history, or Git.
 
@@ -524,6 +524,8 @@ These IDs are provided to make the existing deployment inspectable; use newly re
 | SQL warehouse | `3a4041986a3b0bce` |
 
 Do not reuse these IDs as credentials or assume they will exist in another workspace.
+
+The current bundle name, CLI profile, and `fieldnote_sales_source` table are stable identifiers already used by the deployed workspace resources. They are intentionally retained during this visual brand rename; changing them requires a separately planned Databricks resource/table migration.
 
 ## 15. Troubleshooting Commands from `profilesetup.txt`
 

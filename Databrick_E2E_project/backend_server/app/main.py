@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-app = FastAPI(title="Fieldnote Analytics API", version="1.0.0")
+app = FastAPI(title="SinghInt LLC Analytics API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_origin],
