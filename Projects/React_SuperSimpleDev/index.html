@@ -5,35 +5,13 @@
   </head>
   <body>
     <div class="js-container"></div>
-    <!-- <div>Hello, React!</div> -->
-    <!-- we can run the javascript by importing a js file from folder -->
-    <!-- <script src="script.js"></script> -->
-    <!-- we can also load the javascript from any website js file -->
-    <script src="https://unpkg.com/supersimpledev@8.6.4/external-library.js"></script>
-
     <script src="https://unpkg.com/supersimpledev/react.js"></script>
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
-
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
+    <script type="text/babel" src="./Exercies1.js"></script>
     <script type="text/babel">
-      const myNewButton = <button>Hello</button>;
-      const paragraph = <p>This is a paragraph.</p>;
-      // now to display multipel element we need to put all the element into a common div element
-      const combinedElement = (
-        <div>
-          {myNewButton}
-          {paragraph}
-          {myNewButton}
-          {paragraph}
-          {myNewButton}
-          {paragraph}
-        </div>
-      );
-
       const container = document.querySelector(".js-container");
-      //   in above line the .js-container is using a class from line 7
-      //   ReactDOM.createRoot(container).render(myNewButton);
-      ReactDOM.createRoot(container).render(combinedElement);
+      ReactDOM.createRoot(container).render(solution);
     </script>
   </body>
 </html>
