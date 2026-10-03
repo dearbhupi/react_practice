@@ -8,8 +8,13 @@
     <script src="https://unpkg.com/supersimpledev/react.js"></script>
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
+
+       <script src="https://unpkg.com/supersimpledev/dayjs.js"></script>
+
+       
     <script type="text/babel" src="./Exercies1.js"></script>
     <script type="text/babel">
+         const time = <p>Current time: {dayjs().format('HH:mm:ss')}</p>;
       const container = document.querySelector(".js-container");
       ReactDOM.createRoot(container).render(Ex1Solution);
     </script>

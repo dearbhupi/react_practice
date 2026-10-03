@@ -3,6 +3,8 @@ const initialMessage =(
     Exercise 1!
   </div>
 );
+   
+
 const cottonSocks = (
   <div>
     Cotton Socks
@@ -28,6 +30,7 @@ const product = (
 const Ex1Solution = (
   <>
     {initialMessage}
+
     {cottonSocks}
     {product}
   </>
