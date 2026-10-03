@@ -21,7 +21,7 @@ const product = (
   </div>
 );
 
-const solution = (
+const Ex1Solution = (
   <>
     {initialMessage}
     {cottonSocks}
