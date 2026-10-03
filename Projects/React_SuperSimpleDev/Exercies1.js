@@ -13,12 +13,16 @@ const cottonSocks = (
   </div>
 );
 
-const item1 = 10;
-const item2 = 15;
+const productPrice = 10;
+const shippingCost = 15;
+
 const product = (
-  <div>
-    Total cost : {item1 + item2}
-  </div>
+<div>
+  Product: {productPrice}<br />
+  Shipping: {shippingCost}<br />
+  Total cost: {productPrice + shippingCost}<br/>
+  <button>Place your order</button>
+</div>
 );
 
 const Ex1Solution = (
