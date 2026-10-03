@@ -1,0 +1,1 @@
+console.log('Hello, React! from script.js');

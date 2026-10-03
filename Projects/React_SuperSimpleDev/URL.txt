@@ -1,0 +1,14 @@
+https://supersimple.dev/react-basics
+
+https://unpkg.com/supersimpledev@8.6.4/external-library.js
+
+
+
+what is react ?
+1. React is a external library 
+2. React help us to create website easier
+
+the purpsoe of DOM is it combine the html and JavaScript toghter for webpage
+
+javascript use an additonal library called babel, which use the new version of javascript jsx
+jsx is a new version of jsx

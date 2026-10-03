@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>React Basics</title>
+  </head>
+  <body>
+    <div class="js-container"></div>
+    <!-- <div>Hello, React!</div> -->
+    <!-- we can run the javascript by importing a js file from folder -->
+    <!-- <script src="script.js"></script> -->
+    <!-- we can also load the javascript from any website js file -->
+    <script src="https://unpkg.com/supersimpledev@8.6.4/external-library.js"></script>
+
+    <script src="https://unpkg.com/supersimpledev/react.js"></script>
+    <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
+
+    <script src="https://unpkg.com/supersimpledev/babel.js"></script>
+    <script type="text/babel">
+        const myNewButton = <button>Hello</button>;
+      const container = document.querySelector('.js-container');
+    //   in above line the .js-container is using a class from line 7
+      ReactDOM.createRoot(container).render(myNewButton);
+    </script>
+  </body>
+</html>
