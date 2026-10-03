@@ -17,9 +17,21 @@
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
     <script type="text/babel">
         const myNewButton = <button>Hello</button>;
-      const container = document.querySelector('.js-container');
+        const paragraph = <p>This is a paragraph.</p>;
+// now to display multipel element we need to put all the element into a common div element
+        const combinedElement = <div>
+            {myNewButton}
+            {paragraph}
+             {myNewButton}
+            {paragraph}
+             {myNewButton}
+            {paragraph}
+        </div>;
+
+const container = document.querySelector('.js-container');
     //   in above line the .js-container is using a class from line 7
-      ReactDOM.createRoot(container).render(myNewButton);
+    //   ReactDOM.createRoot(container).render(myNewButton);
+      ReactDOM.createRoot(container).render(combinedElement);
     </script>
   </body>
 </html>

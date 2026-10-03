@@ -12,3 +12,6 @@ the purpsoe of DOM is it combine the html and JavaScript toghter for webpage
 
 javascript use an additonal library called babel, which use the new version of javascript jsx
 jsx is a new version of jsx
+
+our webbrowser do not understand the jsx code, so to make it understand we use babel
+babel, use jsx into js file
