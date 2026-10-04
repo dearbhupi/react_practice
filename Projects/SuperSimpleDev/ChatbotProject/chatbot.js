@@ -2,6 +2,39 @@ function App() {
   const [inputText, setInputText] = React.useState("");
   const [messages, setMessages] = React.useState([]);
 
+  function getBotResponse(text) {
+    const question = text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    let knownQuestion = "";
+
+    if (/^(hi|hello)( chatbot)?$/.test(question)) {
+      knownQuestion = "hello";
+    } else if (question === "how are you") {
+      knownQuestion = "how are you";
+    } else if (question === "flip a coin") {
+      knownQuestion = "flip a coin";
+    } else if (question === "roll a dice") {
+      knownQuestion = "roll a dice";
+    } else if (
+      /^(what is|whats) (the )?(date( today)?|todays date)$/.test(question) ||
+      question === "date today"
+    ) {
+      knownQuestion = "what is the date today";
+    } else if (/^(thank|thanks|thank you)$/.test(question)) {
+      knownQuestion = "thank";
+    }
+
+    if (knownQuestion === "") {
+      return Chatbot.unsuccessfulResponse;
+    }
+
+    return Chatbot.getResponse(knownQuestion);
+  }
+
   function sendMessage() {
     const text = inputText.trim();
     if (text === "") return;
@@ -19,14 +52,14 @@ function App() {
     };
 
     setMessages((currentMessages) => [
-      ...currentMessages,
-      userMessage,
       thinkingMessage,
+      userMessage,
+      ...currentMessages,
     ]);
     setInputText("");
 
     setTimeout(() => {
-      const reply = Chatbot.getResponse(text);
+      const reply = getBotResponse(text);
       setMessages((currentMessages) =>
         currentMessages.map((message) =>
           message.id === thinkingMessage.id
