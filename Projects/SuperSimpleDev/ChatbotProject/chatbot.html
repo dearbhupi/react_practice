@@ -11,8 +11,8 @@
 
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
     <script type="text/babel">
-
-
+      
+      
       function ChatInput() {
         return (
           <>
@@ -25,51 +25,44 @@
           </>
         );
       }
-      //function ChatMessage(props) {
+
       function ChatMessage({ msg, sender }) {
-        // const massage = props.msg;
-        // const sender = props.sender; we can use destructuring instead
-        // destructuring instead of using props directly
-        // if (sender === "user") {
-        //   return (
-        //     <div>
-        //       {msg}
-        //       <img src="./Images/user.png" alt="user" width="50" />
-        //     </div>
-        //   );
-        // } else if (sender === "robot") {
-        //   return (
-        //     <div>
-        //       <img src="./Images/robot.png" alt="robot" width="50" />
-        //       {msg}
-        //     </div>
-        //   );
-        // }
         return (
           <div>
-          {sender === "robot" && <img src="./Images/robot.png" alt="robot" width="50" />}
-          {/* the above statment is called gaurd operator in react which mean if left side is true, the right side will be rendered */}
-        {msg}
-        {sender === "user" && <img src="./Images/user.png" alt="user" width="50" />}
-          </div>  
+            {sender === "robot" && (
+              <img src="./Images/robot.png" alt="robot" width="50" />
+            )}
+            {/* the above statment is called gaurd operator in react which mean if left side is true, the right side will be rendered */}
+            {msg}
+            {sender === "user" && (
+              <img src="./Images/user.png" alt="user" width="50" />
+            )}
+          </div>
         );
       }
 
-      const app = (
-        <>
-          <h1>Welcome to AI Bot</h1>
-          <ChatInput />
-          <ChatMessage msg="hello chatbot" sender="user" />
-          <ChatMessage msg="Hello! How can I assist you today ?" sender="robot"/>
-          <ChatMessage msg="Can you get me todays date" sender="user" />
-          <ChatMessage msg="Today is September 23, 2023" sender="robot" />
-          <ChatMessage msg="What is the temperature today?" sender="user" />
-          <ChatMessage msg="The temperature today is 25°C" sender="robot" />
-        </>
-      );
+      function App() {
+        return (
+          <>
+            <h1>Welcome to AI Bot</h1>
+            <ChatInput />
+            <ChatMessage msg="hello chatbot" sender="user" />
+            <ChatMessage
+              msg="Hello! How can I assist you today ?"
+              sender="robot"
+            />
+            <ChatMessage msg="Can you get me todays date" sender="user" />
+            <ChatMessage msg="Today is September 23, 2023" sender="robot" />
+            <ChatMessage msg="What is the temperature today?" sender="user" />
+            <ChatMessage msg="The temperature today is 25°C" sender="robot" />
+          </>
+        );
+      }
+
+    
 
       const container = document.querySelector(".js-container");
-      ReactDOM.createRoot(container).render(app);
+      ReactDOM.createRoot(container).render(<App />);
     </script>
   </body>
 </html>
