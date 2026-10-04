@@ -40,22 +40,24 @@
       }
 
       function ParseChatMessages() {
-         const msgData = [
+        // useState to hold chat messages which return two values: the current state and a function to update it
+        // setMsgData is the function used to update the msgData state take two arguments: the new state and an optional callback function
+        const [msgData, setMsgData] = React.useState([
           { msg: "hello chatbot", sender: "user", id: crypto.randomUUID() },
           { msg: "Hello! How can I assist you today ?", sender: "robot", id: crypto.randomUUID() },
           { msg: "Can you get me todays date", sender: "user", id: crypto.randomUUID() },
           { msg: "Today is September 23, 2023", sender: "robot", id: crypto.randomUUID() },
           { msg: "What is the temperature today?", sender: "user", id: crypto.randomUUID() },
-        ];
+        ]);
+        console.log(msgData);
 
         function sendMessage() {
-          msgData.push(
-            { msg: "test message", 
-            sender: "user" , 
-            id: crypto.randomUUID() 
-          });
-          console.log(msgData);
+          // create a new message object
+          const newMessage = { msg: "test message", sender: "user", id: crypto.randomUUID() };
+          // update the state with the new message
+          setMsgData([...msgData, newMessage]);
         }
+         
         return (
           <>
           <button onClick={sendMessage}>Send Message</button>
