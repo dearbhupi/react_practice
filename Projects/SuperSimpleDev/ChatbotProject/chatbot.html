@@ -14,11 +14,14 @@
       
       
       function ChatInput() {
-        //const [inputText, setInputText] = React.useState("");
+        const [inputText, setInputText] = React.useState("");
 
         function saveInputText(event){
-          console.log(event.target.value);
-          
+          setInputText(event.target.value);
+        }
+
+        function handleSend() {
+          console.log(inputText);
         }
         return (
           <>
@@ -29,7 +32,7 @@
               onChange={(e) => saveInputText(e)}
               //value={inputText}
             />
-            <button>Send</button>
+            <button onClick={handleSend}>Send</button>
           </>
         );
       }
