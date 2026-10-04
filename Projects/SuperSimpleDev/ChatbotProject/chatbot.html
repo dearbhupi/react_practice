@@ -11,13 +11,23 @@
 
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
     <script type="text/babel">
+      
+      
       function ChatInput() {
+        //const [inputText, setInputText] = React.useState("");
+
+        function saveInputText(event){
+          console.log(event.target.value);
+          
+        }
         return (
           <>
             <input
               type="text"
               placeholder="Send a message to Chatbot..."
               size="30"
+              onChange={(e) => saveInputText(e)}
+              //value={inputText}
             />
             <button>Send</button>
           </>
@@ -40,6 +50,7 @@
       }
 
       function ParseChatMessages() {
+        // here State is the data which is connected to html, so any changes to the state will automatically update the UI
         // useState to hold chat messages which return two values: the current state and a function to update it
         // setMsgData is the function used to update the msgData state take two arguments: the new state and an optional callback function
         const [msgData, setMsgData] = React.useState([
