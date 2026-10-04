@@ -21,8 +21,18 @@ body {
 }
 
 .chat-input button {
-  padding: 8px 14px;
+  padding: 12px 20px;
   cursor: pointer;
+  background-color: blueviolet;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+  transition: background-color 0.3s;
+}
+
+.chat-input button:hover {
+  background-color: darkgreen;
 }
 
 .chat-message {
@@ -40,4 +50,25 @@ body {
   flex: 0 0 50px;
   height: 50px;
   object-fit: contain;
+}
+
+.thinking {
+  min-width: 1.5em;
+  animation: thinking-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes thinking-pulse {
+  from {
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking {
+    animation: none;
+  }
 }

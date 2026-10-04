@@ -11,14 +11,30 @@ function App() {
       text: text,
       sender: "user",
     };
-    const botMessage = {
+    const thinkingMessage = {
       id: crypto.randomUUID(),
-      text: Chatbot.getResponse(text),
+      text: "......",
       sender: "robot",
+      isThinking: true,
     };
 
-    setMessages([...messages, userMessage, botMessage]);
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      userMessage,
+      thinkingMessage,
+    ]);
     setInputText("");
+
+    setTimeout(() => {
+      const reply = Chatbot.getResponse(text);
+      setMessages((currentMessages) =>
+        currentMessages.map((message) =>
+          message.id === thinkingMessage.id
+            ? { ...message, text: reply, isThinking: false }
+            : message,
+        ),
+      );
+    }, 2000);
   }
 
   return (
@@ -42,7 +58,9 @@ function App() {
             {message.sender === "robot" && (
               <img src="./Images/robot.png" alt="Robot" width="50" />
             )}
-            <span>{message.text}</span>
+            <span className={message.isThinking ? "thinking" : undefined}>
+              {message.text}
+            </span>
             {message.sender === "user" && (
               <img src="./Images/user.png" alt="You" width="50" />
             )}
