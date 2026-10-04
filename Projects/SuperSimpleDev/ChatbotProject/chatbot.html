@@ -11,8 +11,6 @@
 
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
     <script type="text/babel">
-      
-      
       function ChatInput() {
         return (
           <>
@@ -42,24 +40,25 @@
       }
 
       function App() {
+        const msgData = [
+          { msg: "hello chatbot", sender: "user" },
+          { msg: "Hello! How can I assist you today ?", sender: "robot" },
+          { msg: "Can you get me todays date", sender: "user" },
+          { msg: "Today is September 23, 2023", sender: "robot" },
+          { msg: "What is the temperature today?", sender: "user" },
+          { msg: "The temperature today is 25°C", sender: "robot" },
+        ];
+        const parseChatMesgdata = msgData.map((message, index) => (
+          <ChatMessage key={index} msg={message.msg} sender={message.sender} />
+        ));
         return (
           <>
             <h1>Welcome to AI Bot</h1>
             <ChatInput />
-            <ChatMessage msg="hello chatbot" sender="user" />
-            <ChatMessage
-              msg="Hello! How can I assist you today ?"
-              sender="robot"
-            />
-            <ChatMessage msg="Can you get me todays date" sender="user" />
-            <ChatMessage msg="Today is September 23, 2023" sender="robot" />
-            <ChatMessage msg="What is the temperature today?" sender="user" />
-            <ChatMessage msg="The temperature today is 25°C" sender="robot" />
+            {parseChatMesgdata}
           </>
         );
       }
-
-    
 
       const container = document.querySelector(".js-container");
       ReactDOM.createRoot(container).render(<App />);
