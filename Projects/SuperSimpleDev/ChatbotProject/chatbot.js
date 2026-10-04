@@ -1,0 +1,57 @@
+function App() {
+  const [inputText, setInputText] = React.useState("");
+  const [messages, setMessages] = React.useState([]);
+
+  function sendMessage() {
+    const text = inputText.trim();
+    if (text === "") return;
+
+    const userMessage = {
+      id: crypto.randomUUID(),
+      text: text,
+      sender: "user",
+    };
+    const botMessage = {
+      id: crypto.randomUUID(),
+      text: Chatbot.getResponse(text),
+      sender: "robot",
+    };
+
+    setMessages([...messages, userMessage, botMessage]);
+    setInputText("");
+  }
+
+  return (
+    <main className="chatbot">
+      <h1>Welcome to AI Bot</h1>
+      <div className="chat-input">
+        <input
+          type="text"
+          placeholder="Send a message to Chatbot..."
+          value={inputText}
+          onChange={(event) => setInputText(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") sendMessage();
+          }}
+        />
+        <button onClick={sendMessage}>Send</button>
+      </div>
+      <section className="chat-messages" aria-label="Chat messages">
+        {messages.map((message) => (
+          <div className={`chat-message ${message.sender}`} key={message.id}>
+            {message.sender === "robot" && (
+              <img src="./Images/robot.png" alt="Robot" width="50" />
+            )}
+            <span>{message.text}</span>
+            {message.sender === "user" && (
+              <img src="./Images/user.png" alt="You" width="50" />
+            )}
+          </div>
+        ))}
+      </section>
+    </main>
+  );
+}
+
+const container = document.querySelector(".js-container");
+ReactDOM.createRoot(container).render(<App />);

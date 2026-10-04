@@ -1,112 +1,19 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chatbot</title>
+    <link rel="stylesheet" href="./chatbot.css" />
   </head>
   <body>
     <div class="js-container"></div>
 
     <script src="https://unpkg.com/supersimpledev/react.js"></script>
     <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
-
+    <script src="https://unpkg.com/supersimpledev/chatbot.js"></script>
     <script src="https://unpkg.com/supersimpledev/babel.js"></script>
-    <script type="text/babel">
-      
-      
-      function ChatInput({ onSend }) {
-        const [inputText, setInputText] = React.useState("");
-
-        function saveInputText(event) {
-          setInputText(event.target.value);
-        }
-
-        function sendMessage() {
-          const message = inputText.trim();
-          if (!message) return;
-
-          onSend(message);
-          setInputText("");
-        }
-        
- 
-        return (
-          <>
-            <input
-              type="text"
-              placeholder="Send a message to Chatbot..."
-              size="30"
-              value={inputText}
-              onChange={saveInputText}
-            />
-            <button onClick={sendMessage}>Send</button>
-          </>
-        );
-      }
-
-      function ChatMessage({ msg, sender }) {
-        return (
-          <div>
-            {sender === "robot" && (
-              <img src="./Images/robot.png" alt="robot" width="50" />
-            )}
-            {/* the above statment is called gaurd operator in react which mean if left side is true, the right side will be rendered */}
-            {msg}
-            {sender === "user" && (
-              <img src="./Images/user.png" alt="user" width="50" />
-            )}
-          </div>
-        );
-      }
-
-      function ParseChatMessages() {
-        // here State is the data which is connected to html, so any changes to the state will automatically update the UI
-        // useState to hold chat messages which return two values: the current state and a function to update it
-        // setMsgData is the function used to update the msgData state take two arguments: the new state and an optional callback function
-        const [msgData, setMsgData] = React.useState([
-          { msg: "hello chatbot", sender: "user", id: crypto.randomUUID() },
-          { msg: "Hello! How can I assist you today ?", sender: "robot", id: crypto.randomUUID() },
-          { msg: "Can you get me todays date", sender: "user", id: crypto.randomUUID() },
-          { msg: "Today is September 23, 2023", sender: "robot", id: crypto.randomUUID() },
-          { msg: "What is the temperature today?", sender: "user", id: crypto.randomUUID() },
-        ]);
-        console.log(msgData);
-
-        function addMessage(message) {
-          const newMessage = {
-            msg: message,
-            sender: "user",
-            id: crypto.randomUUID(),
-          };
-          console.log(newMessage);
-          setMsgData((currentMessages) => [...currentMessages, newMessage]);
-        }
-
-        return (
-          <>
-            <ChatInput onSend={addMessage} />
-            {msgData.map((message) => (
-              <ChatMessage
-                key={message.id}
-                msg={message.msg}
-                sender={message.sender}
-              />
-            ))}
-          </>
-        );
-      }
-
-      function App() {
-        return (
-          <>
-            <h1>Welcome to AI Bot</h1>
-            <ParseChatMessages />
-               
-          </>
-        );
-      }
-
-      const container = document.querySelector(".js-container");
-      ReactDOM.createRoot(container).render(<App />);
-    </script>
+    <script type="text/babel" src="./chatbot.js"></script>
   </body>
 </html>
+
