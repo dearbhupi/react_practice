@@ -15,23 +15,32 @@
       function ChatInput(){
         return (
           <>
-          <input type="text" placeholder="Type your message..." />
+          <input type="text" placeholder="Send a message to Chatbot..." size="30" />
           <button>Send</button>
           </>
         )
       }
+      function ChatMessage(){
+        return (
+          <div>
+            hello chatbot
+            <img src="./Images/user.png" alt="user" width="50"/>
+          </div>
+        )
+      }
 
-      const chatdiv = (
+      const app = (
         <>
         <h1>Welcome to AI Bot</h1>  
         <ChatInput />
+        <ChatMessage />
       
       </>
       
       )
       
       const container = document.querySelector('.js-container');
-      ReactDOM.createRoot(container).render(chatdiv);
+      ReactDOM.createRoot(container).render(app);
     </script>
   </body>
 </html>
