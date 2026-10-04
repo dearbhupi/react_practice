@@ -13,26 +13,32 @@
     <script type="text/babel">
       
       
-      function ChatInput() {
+      function ChatInput({ onSend }) {
         const [inputText, setInputText] = React.useState("");
 
-        function saveInputText(event){
+        function saveInputText(event) {
           setInputText(event.target.value);
         }
 
-        function handleSend() {
-          console.log(inputText);
+        function sendMessage() {
+          const message = inputText.trim();
+          if (!message) return;
+
+          onSend(message);
+          setInputText("");
         }
+        
+ 
         return (
           <>
             <input
               type="text"
               placeholder="Send a message to Chatbot..."
               size="30"
-              onChange={(e) => saveInputText(e)}
-              //value={inputText}
+              value={inputText}
+              onChange={saveInputText}
             />
-            <button onClick={handleSend}>Send</button>
+            <button onClick={sendMessage}>Send</button>
           </>
         );
       }
@@ -65,30 +71,34 @@
         ]);
         console.log(msgData);
 
-        function sendMessage() {
-          // create a new message object
-          const newMessage = { msg: "test message", sender: "user", id: crypto.randomUUID() };
-          // update the state with the new message
-          setMsgData([...msgData, newMessage]);
+        function addMessage(message) {
+          const newMessage = {
+            msg: message,
+            sender: "user",
+            id: crypto.randomUUID(),
+          };
+          console.log(newMessage);
+          setMsgData((currentMessages) => [...currentMessages, newMessage]);
         }
-         
+
         return (
           <>
-          <button onClick={sendMessage}>Send Message</button>
-              {msgData.map((message) => (
-                <ChatMessage key={message.id} msg={message.msg} sender={message.sender} /> 
-              ))}
+            <ChatInput onSend={addMessage} />
+            {msgData.map((message) => (
+              <ChatMessage
+                key={message.id}
+                msg={message.msg}
+                sender={message.sender}
+              />
+            ))}
           </>
         );
-     
-
       }
 
       function App() {
         return (
           <>
             <h1>Welcome to AI Bot</h1>
-            <ChatInput />
             <ParseChatMessages />
                
           </>
