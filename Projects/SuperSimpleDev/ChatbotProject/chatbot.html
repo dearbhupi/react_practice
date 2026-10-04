@@ -20,10 +20,11 @@
           </>
         )
       }
-      function ChatMessage(){
+      function ChatMessage(props){
+        const massage = props.msg;
         return (
           <div>
-            hello chatbot
+            {massage}
             <img src="./Images/user.png" alt="user" width="50"/>
           </div>
         )
@@ -33,7 +34,10 @@
         <>
         <h1>Welcome to AI Bot</h1>  
         <ChatInput />
-        <ChatMessage />
+        <ChatMessage msg="hello chatbot"/>
+        <ChatMessage msg="How are you?"/>
+        <ChatMessage msg="I'm doing well, thanks for asking!"/>
+        <ChatMessage msg="What about you?"/>
       
       </>
       
