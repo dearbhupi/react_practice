@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A browser event listener playground with a live activity log.">
+  <title>EventListener Playground</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="EventListener Playground home">
+      <span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>
+      <span>Event<span>Lab</span></span>
+    </a>
+    <div class="topbar-meta">
+      <span class="live-pill"><i></i> Live</span>
+      <span class="version">DOM EVENTS v1.0</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow"><span>INTERACTIVE DEBUGGER</span></div>
+      <h1>Watch your browser<br><em>come alive.</em></h1>
+      <p>Activate any listener, then interact with the playground. Every event is captured in a real-time log, ready for inspection.</p>
+      <div class="hero-stats" aria-label="Playground statistics">
+        <div><strong id="listenerCount">0</strong><span>Listeners active</span></div>
+        <div><strong id="eventCount">0</strong><span>Events captured</span></div>
+        <div><strong id="lastEvent">—</strong><span>Last event</span></div>
+      </div>
+    </section>
+
+    <section class="control-panel" aria-labelledby="controls-heading">
+      <div class="section-heading">
+        <div>
+          <span class="section-number">01</span>
+          <h2 id="controls-heading">Event listeners</h2>
+        </div>
+        <p>Choose an event type to activate its listener.</p>
+      </div>
+
+      <div class="listener-grid" id="listenerGrid">
+        <button class="listener-card active" data-listener="click" type="button">
+          <span class="card-icon">↗</span><span class="card-copy"><strong>Click</strong><small>Mouse click</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="mousemove" type="button">
+          <span class="card-icon">⌁</span><span class="card-copy"><strong>Mouse move</strong><small>Pointer movement</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="keydown" type="button">
+          <span class="card-icon">⌨</span><span class="card-copy"><strong>Key down</strong><small>Keyboard input</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="keyup" type="button">
+          <span class="card-icon">⌨</span><span class="card-copy"><strong>Key up</strong><small>Keyboard release</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="input" type="button">
+          <span class="card-icon">◫</span><span class="card-copy"><strong>Input</strong><small>Text entry</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="change" type="button">
+          <span class="card-icon">◇</span><span class="card-copy"><strong>Change</strong><small>Value changed</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="focus" type="button">
+          <span class="card-icon">◎</span><span class="card-copy"><strong>Focus</strong><small>Element receives focus</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="blur" type="button">
+          <span class="card-icon">○</span><span class="card-copy"><strong>Blur</strong><small>Element loses focus</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="submit" type="button">
+          <span class="card-icon">↵</span><span class="card-copy"><strong>Submit</strong><small>Form submission</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="scroll" type="button">
+          <span class="card-icon">≡</span><span class="card-copy"><strong>Scroll</strong><small>Page movement</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="touchstart" type="button">
+          <span class="card-icon">✦</span><span class="card-copy"><strong>Touch start</strong><small>Touch gesture</small></span><span class="toggle"><i></i></span>
+        </button>
+        <button class="listener-card active" data-listener="contextmenu" type="button">
+          <span class="card-icon">⌖</span><span class="card-copy"><strong>Context menu</strong><small>Right-click action</small></span><span class="toggle"><i></i></span>
+        </button>
+      </div>
+
+      <div class="control-hint">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v4m0 4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+        <span>All listeners are active. Toggle a card to pause or resume its capture.</span>
+      </div>
+    </section>
+
+    <section class="playground" aria-labelledby="playground-heading">
+      <div class="section-heading compact">
+        <div>
+          <span class="section-number">02</span>
+          <h2 id="playground-heading">Try the events</h2>
+        </div>
+        <p>Interact with the controls below to generate activity.</p>
+      </div>
+
+      <div class="playground-grid">
+        <form class="form-card" id="eventForm">
+          <div class="card-heading"><span>01</span><div><h3>Event form</h3><p>Try input, selection, and submission.</p></div></div>
+          <label for="nameInput">Your name</label>
+          <input id="nameInput" name="name" type="text" placeholder="Type something..." autocomplete="name">
+          <label for="roleSelect">Role</label>
+          <div class="select-wrap">
+            <select id="roleSelect" name="role">
+              <option value="developer">Developer</option>
+              <option value="designer">Designer</option>
+              <option value="student">Student</option>
+            </select>
+          </div>
+          <label for="messageInput">Message</label>
+          <textarea id="messageInput" name="message" rows="4" placeholder="Write a message..."></textarea>
+          <button class="primary-button" type="submit">Submit event <span>→</span></button>
+        </form>
+
+        <div class="interaction-card">
+          <div class="card-heading"><span>02</span><div><h3>Pointer area</h3><p>Move, click, and right-click inside.</p></div></div>
+          <div class="pointer-zone" id="pointerZone" tabindex="0" aria-label="Interactive pointer area">
+            <div class="zone-grid"></div>
+            <span class="zone-icon">⌁</span>
+            <strong>Move your pointer here</strong>
+            <small>Click, focus, or right-click to generate events</small>
+          </div>
+          <div class="quick-actions">
+            <button id="clickDemo" type="button"><span>↗</span> Click demo</button>
+            <button id="focusDemo" type="button"><span>◎</span> Focus demo</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="log-section" aria-labelledby="log-heading">
+      <div class="log-header">
+        <div class="section-heading compact">
+          <div>
+            <span class="section-number">03</span>
+            <h2 id="log-heading">Event log</h2>
+          </div>
+          <p>Live stream of captured browser activity.</p>
+        </div>
+        <div class="log-actions">
+          <button id="pauseButton" type="button"><span class="pause-icon">Ⅱ</span> Pause capture</button>
+          <button id="clearButton" type="button">Clear log</button>
+        </div>
+      </div>
+
+      <div class="log-shell">
+        <div class="log-toolbar">
+          <div class="window-dots"><i></i><i></i><i></i></div>
+          <span>event-stream.log</span>
+          <div class="filter" id="filterStatus">ALL EVENTS</div>
+        </div>
+        <div class="event-log" id="eventLog" aria-live="polite" aria-label="Captured events">
+          <div class="empty-state" id="emptyState">
+            <span class="empty-icon">⌁</span>
+            <strong>No events yet</strong>
+            <p>Start interacting with the playground above.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>EventListener Playground</span><span>Built for curious developers</span></footer>
+  <script src="script.js"></script>
+</body>
+</html>
