@@ -7,8 +7,14 @@ const lastEvent = document.querySelector('#lastEvent');
 const pauseButton = document.querySelector('#pauseButton');
 const clearButton = document.querySelector('#clearButton');
 const pointerZone = document.querySelector('#pointerZone');
+const colorSwatch = document.querySelector('#colorSwatch');
+const colorDot = document.querySelector('#colorDot');
+const hexValue = document.querySelector('#hexValue');
+const rgbValue = document.querySelector('#rgbValue');
 const filterStatus = document.querySelector('#filterStatus');
 const form = document.querySelector('#eventForm');
+const dropZone = document.querySelector('#dropZone');
+const fileInput = document.querySelector('#fileInput');
 
 const activeListeners = new Set(listenerCards.map((card) => card.dataset.listener));
 let eventTotal = 0;
@@ -38,7 +44,7 @@ function formatTime(date = new Date()) {
 }
 
 function addEvent(type, detail) {
-  if (isPaused || !activeListeners.has(type)) return;
+  if (isPaused || (!activeListeners.has(type) && type !== 'drop')) return;
 
   const entry = { type, detail, time: new Date() };
   logEntries.push(entry);
@@ -124,11 +130,56 @@ form.addEventListener('submit', (event) => {
   window.setTimeout(() => status.remove(), 3000);
 });
 
-pointerZone.addEventListener('click', (event) => {
+function getPointerColor(event) {
+  const rect = pointerZone.getBoundingClientRect();
+  const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+  const y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+  const hue = (x / rect.width) * 360;
+  const saturation = 100;
+  const lightness = 50 + Math.sin((y / rect.height) * Math.PI) * 18;
+  const hsl = `hsl(${hue} ${saturation}% ${lightness}%)`;
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const context = canvas.getContext('2d');
+  context.fillStyle = hsl;
+  context.fillRect(0, 0, 1, 1);
+  return context.getImageData(0, 0, 1, 1).data;
+}
+
+function updateColor(event) {
+  const rect = pointerZone.getBoundingClientRect();
+  const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+  const y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+  const [red, green, blue] = getPointerColor(event);
+  const hex = `#${[red, green, blue].map((value) => value.toString(16).padStart(2, '0')).join('')}`;
+
+  pointerZone.style.setProperty('--pointer-x', `${(x / rect.width) * 100}%`);
+  pointerZone.style.setProperty('--pointer-y', `${(y / rect.height) * 100}%`);
+  pointerZone.style.setProperty('--selected-color', hex);
+  colorSwatch.style.background = hex;
+  colorDot.style.background = hex;
+  hexValue.textContent = hex.toUpperCase();
+  rgbValue.textContent = `RGB(${red}, ${green}, ${blue})`;
+}
+
+pointerZone.addEventListener('pointermove', updateColor);
+pointerZone.addEventListener('pointerdown', (event) => {
+  updateColor(event);
   pointerZone.classList.add('active');
-  window.setTimeout(() => pointerZone.classList.remove('active'), 300);
 });
-pointerZone.addEventListener('focus', () => pointerZone.classList.add('active'));
+pointerZone.addEventListener('pointerup', () => pointerZone.classList.remove('active'));
+pointerZone.addEventListener('pointerleave', () => pointerZone.classList.remove('active'));
+pointerZone.addEventListener('focus', () => {
+  pointerZone.style.setProperty('--pointer-x', '50%');
+  pointerZone.style.setProperty('--pointer-y', '50%');
+  pointerZone.style.setProperty('--selected-color', '#c8ff45');
+  colorSwatch.style.background = '#c8ff45';
+  colorDot.style.background = '#c8ff45';
+  hexValue.textContent = '#C8FF45';
+  rgbValue.textContent = 'RGB(200, 255, 69)';
+  pointerZone.classList.add('active');
+});
 pointerZone.addEventListener('blur', () => pointerZone.classList.remove('active'));
 
 document.querySelector('#clickDemo').addEventListener('click', () => {
@@ -142,6 +193,44 @@ pauseButton.addEventListener('click', () => {
   isPaused = !isPaused;
   pauseButton.innerHTML = isPaused ? '<span class="pause-icon">▶</span> Resume capture' : '<span class="pause-icon">Ⅱ</span> Pause capture';
   filterStatus.textContent = isPaused ? 'CAPTURE PAUSED' : 'ALL EVENTS';
+});
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    fileInput.click();
+  }
+});
+fileInput.addEventListener('change', () => {
+  [...fileInput.files].forEach((file) => {
+    const size = file.size < 1024 * 1024
+      ? `${Math.max(file.size, 1)} B`
+      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+    addEvent('drop', `File: ${file.name} · Type: ${file.type || 'unknown'} · Size: ${size}`);
+  });
+  fileInput.value = '';
+});
+
+['dragenter', 'dragover'].forEach((eventName) => {
+  dropZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    dropZone.classList.add('dragging');
+  });
+});
+['dragleave', 'drop'].forEach((eventName) => {
+  dropZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    dropZone.classList.remove('dragging');
+  });
+});
+dropZone.addEventListener('drop', (event) => {
+  [...event.dataTransfer.files].forEach((file) => {
+    const size = file.size < 1024 * 1024
+      ? `${Math.max(file.size, 1)} B`
+      : `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+    addEvent('drop', `File: ${file.name} · Type: ${file.type || 'unknown'} · Size: ${size}`);
+  });
 });
 
 clearButton.addEventListener('click', clearLog);
