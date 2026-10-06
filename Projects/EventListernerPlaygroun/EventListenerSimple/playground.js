@@ -1,4 +1,4 @@
-const logEl = document.getElementById('log');
+const log = document.getElementById('log');
 const coordinateBox = document.getElementById('coordinateBox');
 const coordinateX = document.getElementById('coordinateX');
 const coordinateY = document.getElementById('coordinateY');
@@ -8,8 +8,8 @@ function logMe(name, note) {
     const line = document.createElement('div');
 
     line.textContent = `${time} - ${name}: ${note}`;
-    logEl.appendChild(line);
-    logEl.scrollTop = logEl.scrollHeight;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
 }
 
 coordinateBox.addEventListener('pointermove', (event) => {
@@ -23,6 +23,8 @@ coordinateBox.addEventListener('pointermove', (event) => {
 });
 
 coordinateBox.addEventListener('pointerleave', () => {
+    logMe('coordinateBox pointerleave', 'Pointer left the coordinate box');
     coordinateX.textContent = '0';
     coordinateY.textContent = '0';
 });
+   
