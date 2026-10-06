@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Playground</title>
+    <link rel="stylesheet" href="playground.css">
+</head>
+<body>
+    <header>
+        <h1>Event Playground</h1>
+    </header>
+    <main class="playground-layout">
+        <section class="tracker-section" aria-labelledby="tracker-heading">
+            <div class="section-heading">
+                <span class="section-number">01</span>
+                <div>
+                    <h2 id="tracker-heading">Coordinate tracker</h2>
+                    <p>Move your pointer inside the box to capture X and Y coordinates.</p>
+                </div>
+            </div>
+
+            <div id="coordinateBox" class="coordinate-box" aria-label="Mouse coordinate tracker">
+                <div class="coordinate-box-header">
+                    <span>Coordinate tracker</span>
+                    <small>Move inside the box</small>
+                </div>
+                <div class="coordinate-values">
+                    <span>X <strong id="coordinateX">0</strong></span>
+                    <span>Y <strong id="coordinateY">0</strong></span>
+                </div>
+                <div class="coordinate-grid" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <section class="log-section" aria-labelledby="log-heading">
+            <div class="section-heading">
+                <span class="section-number">02</span>
+                <div>
+                    <h2 id="log-heading">Event log</h2>
+                    <p>Live events appear at the bottom.</p>
+                </div>
+            </div>
+            <div id="log" class="event-log" aria-live="polite">(Event log will appear here)</div>
+        </section>
+    </main>
+
+    <script src="playground.js"></script>
+</body>
+</html>

@@ -93,6 +93,13 @@ select { appearance: none; }
 .pointer-zone strong { position: relative; z-index: 1; color: white; font-size: 14px; text-shadow: 0 1px 7px rgba(0,0,0,.38); }
 .pointer-zone small { position: relative; z-index: 1; margin-top: 4px; color: rgba(255,255,255,.85); font-size: 10px; text-shadow: 0 1px 7px rgba(0,0,0,.38); }
 .color-swatch { position: absolute; z-index: 2; width: 22px; height: 22px; border: 2px solid rgba(255,255,255,.95); border-radius: 50%; box-shadow: 0 2px 12px rgba(0,0,0,.35); background: var(--selected-color, #ff3b30); left: var(--pointer-x, 50%); top: var(--pointer-y, 50%); transform: translate(-50%, -50%); pointer-events: none; transition: left .06s linear, top .06s linear, background .06s linear; }
+.coordinate-box { height: 112px; margin-top: 12px; padding: 13px; position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.5); cursor: crosshair; }
+.coordinate-box-header { display: flex; align-items: center; justify-content: space-between; color: var(--ink); font-size: 10px; font-weight: 700; }
+.coordinate-box-header small { color: var(--muted); font-size: 8px; font-weight: 500; }
+.coordinate-values { position: absolute; right: 13px; bottom: 12px; display: flex; gap: 12px; }
+.coordinate-values span { color: var(--muted); font: 500 9px var(--mono); }
+.coordinate-values strong { color: var(--ink); font-size: 12px; }
+.coordinate-grid { position: absolute; inset: 35px 13px 12px; border: 1px dashed rgba(21,23,19,.15); background-image: linear-gradient(rgba(21,23,19,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(21,23,19,.055) 1px, transparent 1px); background-size: 18px 18px; pointer-events: none; }
 .color-readout { margin-top: 12px; padding: 11px 13px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.58); }
 .color-readout > span { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
 .color-readout i { width: 8px; height: 8px; border-radius: 50%; background: var(--selected-color, #ff3b30); box-shadow: 0 0 0 3px rgba(255,59,48,.14); }

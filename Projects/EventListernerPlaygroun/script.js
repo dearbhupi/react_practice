@@ -7,6 +7,9 @@ const lastEvent = document.querySelector('#lastEvent');
 const pauseButton = document.querySelector('#pauseButton');
 const clearButton = document.querySelector('#clearButton');
 const pointerZone = document.querySelector('#pointerZone');
+const coordinateBox = document.querySelector('#coordinateBox');
+const coordinateX = document.querySelector('#coordinateX');
+const coordinateY = document.querySelector('#coordinateY');
 const colorSwatch = document.querySelector('#colorSwatch');
 const colorDot = document.querySelector('#colorDot');
 const hexValue = document.querySelector('#hexValue');
@@ -181,6 +184,20 @@ pointerZone.addEventListener('focus', () => {
   pointerZone.classList.add('active');
 });
 pointerZone.addEventListener('blur', () => pointerZone.classList.remove('active'));
+
+coordinateBox.addEventListener('mousemove', (event) => {
+  const rect = coordinateBox.getBoundingClientRect();
+  const x = Math.round(event.clientX - rect.left);
+  const y = Math.round(event.clientY - rect.top);
+  coordinateX.textContent = x;
+  coordinateY.textContent = y;
+  addEvent('mousemove', `Coordinate tracker: X ${x}, Y ${y}`);
+});
+
+coordinateBox.addEventListener('mouseleave', () => {
+  coordinateX.textContent = '0';
+  coordinateY.textContent = '0';
+});
 
 document.querySelector('#clickDemo').addEventListener('click', () => {
   document.querySelector('#pointerZone').scrollIntoView({ behavior: 'smooth', block: 'center' });
