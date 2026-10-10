@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kanban Board</title>
+  <style>
+    .board { display: flex; gap: 20px; }
+    .column { width: 200px; min-height: 250px; 
+        background: #f0f0f0; padding: 10px; border-radius: 5px; }
+    .card { background: #ffffff; padding: 10px; 
+        margin-bottom: 10px; border: 1px solid #ccc; cursor: grab; }
+  </style>
+</head>
+<body>
+  <h2>Interactive Task Board</h2>
+  <div class="board">
+    <div class="column" id="todo" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>To Do</h3>
+      <div class="card" id="task-1" draggable="true" ondragstart="drag(event)">Design Mockups</div>
+      <div class="card" id="task-2" draggable="true" ondragstart="drag(event)">Set up Database</div>
+    </div>
+    <div class="column" id="in-progress" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>In Progress</h3>
+    </div>
+    <div class="column" id="done" ondragover="allowDrop(event)" ondrop="drop(event)">
+      <h3>Done</h3>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
