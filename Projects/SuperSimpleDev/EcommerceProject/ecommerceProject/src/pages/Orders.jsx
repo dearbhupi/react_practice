@@ -1,7 +1,6 @@
-import React from 'react'
 import './Orders.css'
 
-function Orders() {
+export function Orders() {
   return (
     <>
          <div className="header">
@@ -174,5 +173,3 @@ function Orders() {
     </>
   )
 }
-
-export default Orders

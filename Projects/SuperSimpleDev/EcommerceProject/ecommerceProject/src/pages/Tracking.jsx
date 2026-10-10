@@ -1,7 +1,6 @@
-import React from 'react'
 import './Tracking.css'
 
-function Tracking() {
+export function Tracking() {
   return (
     <>
        <div class="header">
@@ -77,5 +76,4 @@ function Tracking() {
   )
 }
 
-export default Tracking
 

@@ -2,7 +2,7 @@
 import './CheckoutPage.css'
 import './checkout-header.css'
 
-function CheckoutPage() {
+export function CheckoutPage() {
   return (
     <>
         <title>Checkout</title>
@@ -210,4 +210,4 @@ function CheckoutPage() {
   );
 }
 
-export default CheckoutPage;
+

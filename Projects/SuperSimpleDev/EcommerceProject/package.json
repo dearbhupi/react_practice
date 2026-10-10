@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "react-router": "^8.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.12.0"
   }
 }
