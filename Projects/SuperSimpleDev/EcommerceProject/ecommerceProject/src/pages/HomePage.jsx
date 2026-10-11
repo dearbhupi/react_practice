@@ -1,18 +1,32 @@
 import "./homePage.css";
 import { Header } from "../components/Header";
-import { products } from "../../data/products";
-import axios from 'axios';
-
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 function HomePage() {
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState("");
 
-  axios.get("http://127.0.0.1:3000/api/products")
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.error("Error fetching products:", error);
-    });
+  useEffect(() => {
+    const controller = new AbortController();
+
+    axios
+      .get("http://127.0.0.1:3000/api/products", {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        setProducts(response.data);
+      })
+      .catch((requestError) => {
+        if (controller.signal.aborted) return;
+
+        console.error("Error fetching products:", requestError);
+        setError("Unable to load products. Please try again later.");
+      });
+
+    return () => controller.abort();
+  }, []);
+
   return (
     <>
       <title>Ecommerce Project</title>
@@ -20,7 +34,7 @@ function HomePage() {
 
       <div className="home-page">
         <div className="products-grid">
-          {products.map((product) => (
+          {error ? <p role="alert">{error}</p> : products.map((product) => (
             <div key={product.id} className="product-container">
               <div className="product-image-container">
                 <img className="product-image" src={product.image} />
