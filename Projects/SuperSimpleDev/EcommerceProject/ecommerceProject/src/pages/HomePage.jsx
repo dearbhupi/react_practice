@@ -5,7 +5,9 @@ import { products } from "../../data/products";
 function HomePage() {
 
   fetch("http://127.0.0.1:5000/api/products")
-    .then((response) => response.json())
+    .then((response) => {
+      return response.json();
+    })
     .then((data) => {
       console.log(data);
     })
