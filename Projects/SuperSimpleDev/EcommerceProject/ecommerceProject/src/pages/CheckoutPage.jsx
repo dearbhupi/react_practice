@@ -19,27 +19,39 @@ export function CheckoutPage({ cartItems = [] }) {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [error, setError] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [paymentSummary, setPaymentSummary] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    axios
-      .get("/api/delivery-options?expand=estimatedDeliveryTime", {
-        signal: controller.signal,
-      })
-      .then((response) => {
-        if (!Array.isArray(response.data)) {
-          throw new TypeError("Delivery options response must be an array.");
+    async function loadCheckoutData() {
+      try {
+        const [deliveryResponse, summaryResponse] = await Promise.all([
+          axios.get("/api/delivery-options?expand=estimatedDeliveryTime",
+             { signal: controller.signal}),
+          axios.get("/api/payment-summary",
+             { signal: controller.signal }),
+        ]);
+
+        if (
+          !Array.isArray(deliveryResponse.data) ||
+          !summaryResponse.data ||
+          typeof summaryResponse.data.totalItems !== "number"
+        ) {
+          throw new TypeError("Checkout API returned data in an unexpected format.");
         }
 
-        setDeliveryOptions(response.data);
-      })
-      .catch((requestError) => {
+        setDeliveryOptions(deliveryResponse.data);
+        setPaymentSummary(summaryResponse.data);
+      } catch (requestError) {
         if (controller.signal.aborted) return;
 
-        console.error("Error fetching delivery options:", requestError);
-        setError("Unable to load delivery options. Please try again.");
-      });
+        console.error("Error loading checkout data:", requestError);
+        setError("Unable to load checkout details. Please try again.");
+      }
+    }
+
+    loadCheckoutData();
 
     return () => controller.abort();
   }, []);
@@ -53,23 +65,11 @@ export function CheckoutPage({ cartItems = [] }) {
     );
   }
 
-  const itemCount = cartItems.reduce(
+  const cartItemCount = cartItems.reduce(
     (total, cartItem) => total + cartItem.quantity,
     0,
   );
-  const productCostCents = cartItems.reduce(
-    (total, cartItem) =>
-      total + cartItem.product.priceCents * cartItem.quantity,
-    0,
-  );
-  const shippingCostCents = cartItems.reduce(
-    (total, cartItem) =>
-      total + (getSelectedOption(cartItem)?.priceCents ?? 0),
-    0,
-  );
-  const totalCostBeforeTaxCents = productCostCents + shippingCostCents;
-  const taxCents = Math.round(totalCostBeforeTaxCents * 0.1);
-  const totalCostCents = totalCostBeforeTaxCents + taxCents;
+  const itemCount = paymentSummary?.totalItems ?? cartItemCount;
 
   async function selectDeliveryOption(productId, optionId) {
     setError("");
@@ -78,9 +78,11 @@ export function CheckoutPage({ cartItems = [] }) {
       await axios.put(`/api/cart-items/${productId}`, {
         deliveryOptionId: optionId,
       });
+      const summaryResponse = await axios.get("/api/payment-summary");
+      setPaymentSummary(summaryResponse.data);
       setSelectedOptions((options) => ({ ...options, [productId]: optionId }));
     } catch (requestError) {
-      console.error("Error updating delivery option:", requestError);
+      console.error("Error updating checkout summary:", requestError);
       setError("Unable to update the delivery option. Please try again.");
     }
   }
@@ -228,36 +230,42 @@ export function CheckoutPage({ cartItems = [] }) {
 
           <div className="payment-summary">
             <div className="payment-summary-title">Payment Summary</div>
-            <div className="payment-summary-row">
-              <div>Items ({itemCount}):</div>
-              <div className="payment-summary-money">
-                {formatMoney(productCostCents)}
-              </div>
-            </div>
-            <div className="payment-summary-row">
-              <div>Shipping &amp; handling:</div>
-              <div className="payment-summary-money">
-                {formatMoney(shippingCostCents)}
-              </div>
-            </div>
-            <div className="payment-summary-row subtotal-row">
-              <div>Total before tax:</div>
-              <div className="payment-summary-money">
-                {formatMoney(totalCostBeforeTaxCents)}
-              </div>
-            </div>
-            <div className="payment-summary-row">
-              <div>Estimated tax (10%):</div>
-              <div className="payment-summary-money">
-                {formatMoney(taxCents)}
-              </div>
-            </div>
-            <div className="payment-summary-row total-row">
-              <div>Order total:</div>
-              <div className="payment-summary-money">
-                {formatMoney(totalCostCents)}
-              </div>
-            </div>
+            {paymentSummary ? (
+              <>
+                <div className="payment-summary-row">
+                  <div>Items ({itemCount}):</div>
+                  <div className="payment-summary-money">
+                    {formatMoney(paymentSummary.productCostCents)}
+                  </div>
+                </div>
+                <div className="payment-summary-row">
+                  <div>Shipping &amp; handling:</div>
+                  <div className="payment-summary-money">
+                    {formatMoney(paymentSummary.shippingCostCents)}
+                  </div>
+                </div>
+                <div className="payment-summary-row subtotal-row">
+                  <div>Total before tax:</div>
+                  <div className="payment-summary-money">
+                    {formatMoney(paymentSummary.totalCostBeforeTaxCents)}
+                  </div>
+                </div>
+                <div className="payment-summary-row">
+                  <div>Estimated tax (10%):</div>
+                  <div className="payment-summary-money">
+                    {formatMoney(paymentSummary.taxCents)}
+                  </div>
+                </div>
+                <div className="payment-summary-row total-row">
+                  <div>Order total:</div>
+                  <div className="payment-summary-money">
+                    {formatMoney(paymentSummary.totalCostCents)}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p>Loading payment summary...</p>
+            )}
             <button
               type="button"
               className="place-order-button button-primary"
