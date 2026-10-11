@@ -1,13 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./CheckoutPage.css";
 import "./checkout-header.css";
-import {formatMoney} from "../utils/money";
+import formatMoney from "../utils/money";
 
 function formatDeliveryDate(timestamp) {
-  if (!Number.isFinite(timestamp)) return "Date unavailable";
-
   return new Date(timestamp).toLocaleDateString(undefined, {
     weekday: "long",
     month: "long",
@@ -15,107 +13,80 @@ function formatDeliveryDate(timestamp) {
   });
 }
 
-function formatPrice(priceCents) {
-  return `$${(priceCents / 100).toFixed(2)}`;
-}
-
-export function CheckoutPage() {
+export function CheckoutPage({ cartItems = [] }) {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState([]);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
-  const [paymentSummary, setPaymentSummary] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedOptions, setSelectedOptions] = useState({});
   const [error, setError] = useState("");
-  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-
-  const fetchCheckoutData = useCallback(async (signal) => {
-    const [cartResponse, deliveryResponse, summaryResponse] =
-      await Promise.all([
-        axios.get("/api/cart-items?expand=product", { signal }),
-        axios.get("/api/delivery-options?expand=estimatedDeliveryTime", {
-          signal,
-        }),
-        axios.get("/api/payment-summary", { signal }),
-      ]);
-
-    if (
-      !Array.isArray(cartResponse.data) ||
-      !cartResponse.data.every((item) => item.product) ||
-      !Array.isArray(deliveryResponse.data) ||
-      !summaryResponse.data ||
-      typeof summaryResponse.data.totalItems !== "number"
-    ) {
-      throw new TypeError("Checkout API returned data in an unexpected format.");
-    }
-
-    return {
-      cartItems: cartResponse.data,
-      deliveryOptions: deliveryResponse.data,
-      paymentSummary: summaryResponse.data,
-    };
-  }, []);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function loadCheckoutData() {
-      try {
-        const checkoutData = await fetchCheckoutData(controller.signal);
+    axios
+      .get("/api/delivery-options?expand=estimatedDeliveryTime", {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        if (!Array.isArray(response.data)) {
+          throw new TypeError("Delivery options response must be an array.");
+        }
+
+        setDeliveryOptions(response.data);
+      })
+      .catch((requestError) => {
         if (controller.signal.aborted) return;
 
-        setError("");
-        setCartItems(checkoutData.cartItems);
-        setDeliveryOptions(checkoutData.deliveryOptions);
-        setPaymentSummary(checkoutData.paymentSummary);
-      } catch (requestError) {
-        if (controller.signal.aborted) return;
-
-        console.error("Error loading checkout data:", requestError);
-        setError("Unable to load checkout details. Please try again.");
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
-      }
-    }
-
-    loadCheckoutData();
+        console.error("Error fetching delivery options:", requestError);
+        setError("Unable to load delivery options. Please try again.");
+      });
 
     return () => controller.abort();
-  }, [fetchCheckoutData]);
+  }, []);
 
-  async function updateCartItem(productId, changes) {
-    setError("");
-    setIsLoading(true);
-    try {
-      await axios.put(`/api/cart-items/${productId}`, changes);
-      const checkoutData = await fetchCheckoutData();
-      setCartItems(checkoutData.cartItems);
-      setDeliveryOptions(checkoutData.deliveryOptions);
-      setPaymentSummary(checkoutData.paymentSummary);
-    } catch (requestError) {
-      console.error("Error updating cart item:", requestError);
-      setError("Unable to update your cart. Please try again.");
-      setIsLoading(false);
-    }
+  function getSelectedOption(cartItem) {
+    const optionId =
+      selectedOptions[cartItem.productId] ?? cartItem.deliveryOptionId;
+    return (
+      deliveryOptions.find((option) => option.id === optionId) ??
+      deliveryOptions[0]
+    );
   }
 
-  async function deleteCartItem(productId) {
+  const itemCount = cartItems.reduce(
+    (total, cartItem) => total + cartItem.quantity,
+    0,
+  );
+  const productCostCents = cartItems.reduce(
+    (total, cartItem) =>
+      total + cartItem.product.priceCents * cartItem.quantity,
+    0,
+  );
+  const shippingCostCents = cartItems.reduce(
+    (total, cartItem) =>
+      total + (getSelectedOption(cartItem)?.priceCents ?? 0),
+    0,
+  );
+  const totalCostBeforeTaxCents = productCostCents + shippingCostCents;
+  const taxCents = Math.round(totalCostBeforeTaxCents * 0.1);
+  const totalCostCents = totalCostBeforeTaxCents + taxCents;
+
+  async function selectDeliveryOption(productId, optionId) {
     setError("");
-    setIsLoading(true);
+
     try {
-      await axios.delete(`/api/cart-items/${productId}`);
-      const checkoutData = await fetchCheckoutData();
-      setCartItems(checkoutData.cartItems);
-      setDeliveryOptions(checkoutData.deliveryOptions);
-      setPaymentSummary(checkoutData.paymentSummary);
+      await axios.put(`/api/cart-items/${productId}`, {
+        deliveryOptionId: optionId,
+      });
+      setSelectedOptions((options) => ({ ...options, [productId]: optionId }));
     } catch (requestError) {
-      console.error("Error removing cart item:", requestError);
-      setError("Unable to remove this item. Please try again.");
-      setIsLoading(false);
+      console.error("Error updating delivery option:", requestError);
+      setError("Unable to update the delivery option. Please try again.");
     }
   }
 
   async function placeOrder() {
-    setIsSubmittingOrder(true);
+    setIsPlacingOrder(true);
     setError("");
 
     try {
@@ -124,10 +95,10 @@ export function CheckoutPage() {
     } catch (requestError) {
       console.error("Error placing order:", requestError);
       setError(
-        requestError.response?.data?.error ||
+        requestError.response?.data?.error ??
           "Unable to place your order. Please try again.",
       );
-      setIsSubmittingOrder(false);
+      setIsPlacingOrder(false);
     }
   }
 
@@ -139,45 +110,55 @@ export function CheckoutPage() {
           <div className="checkout-header-left-section">
             <a href="/">
               <img className="logo" src="images/logo.png" alt="Home" />
-              <img className="mobile-logo" src="images/mobile-logo.png" alt="Home" />
+              <img
+                className="mobile-logo"
+                src="images/mobile-logo.png"
+                alt="Home"
+              />
             </a>
           </div>
 
           <div className="checkout-header-middle-section">
             Checkout (
             <a className="return-to-home-link" href="/">
-              {paymentSummary?.totalItems ?? 0} items
+              {itemCount} items
             </a>
             )
           </div>
 
           <div className="checkout-header-right-section">
-            <img src="images/icons/checkout-lock-icon.png" alt="Secure checkout" />
+            <img
+              src="images/icons/checkout-lock-icon.png"
+              alt="Secure checkout"
+            />
           </div>
         </div>
       </div>
 
       <div className="checkout-page">
         <div className="page-title">Review your order</div>
-
         {error && <p role="alert">{error}</p>}
-        {isLoading ? (
-          <p>Loading checkout...</p>
-        ) : (
-          <div className="checkout-grid">
-            <div className="order-summary">
-              {cartItems.length === 0 ? (
-                <p>Your cart is empty.</p>
-              ) : (
-                cartItems.map((cartItem) => (
-                  <div key={cartItem.productId} className="cart-item-container">
+
+        <div className="checkout-grid">
+          <div className="order-summary">
+            {cartItems.length === 0 ? (
+              <p>Your cart is empty.</p>
+            ) : (
+              cartItems.map((cartItem) => {
+                const selectedOption = getSelectedOption(cartItem);
+
+                return (
+                  <div
+                    key={cartItem.productId}
+                    className="cart-item-container"
+                  >
                     <div className="delivery-date">
                       Delivery date:{" "}
-                      {formatDeliveryDate(
-                        deliveryOptions.find(
-                          (option) => option.id === cartItem.deliveryOptionId,
-                        )?.estimatedDeliveryTimeMs,
-                      )}
+                      {selectedOption
+                        ? formatDeliveryDate(
+                            selectedOption.estimatedDeliveryTimeMs,
+                          )
+                        : "Unavailable"}
                     </div>
 
                     <div className="cart-item-details-grid">
@@ -188,36 +169,17 @@ export function CheckoutPage() {
                       />
 
                       <div className="cart-item-details">
-                        <div className="product-name">{cartItem.product.name}</div>
+                        <div className="product-name">
+                          {cartItem.product.name}
+                        </div>
                         <div className="product-price">
-                          {formatPrice(cartItem.product.priceCents)}
+                          {formatMoney(cartItem.product.priceCents)}
                         </div>
                         <div className="product-quantity">
-                          <label htmlFor={`quantity-${cartItem.productId}`}>
-                            Quantity:
-                          </label>{" "}
-                          <select
-                            id={`quantity-${cartItem.productId}`}
-                            value={cartItem.quantity}
-                            onChange={(event) =>
-                              updateCartItem(cartItem.productId, {
-                                quantity: Number(event.target.value),
-                              })
-                            }
-                          >
-                            {Array.from({ length: 10 }, (_, index) => (
-                              <option key={index + 1} value={index + 1}>
-                                {index + 1}
-                              </option>
-                            ))}
-                          </select>{" "}
-                          <button
-                            type="button"
-                            className="delete-quantity-link link-primary"
-                            onClick={() => deleteCartItem(cartItem.productId)}
-                          >
-                            Delete
-                          </button>
+                          Quantity:{" "}
+                          <span className="quantity-label">
+                            {cartItem.quantity}
+                          </span>
                         </div>
                       </div>
 
@@ -229,28 +191,29 @@ export function CheckoutPage() {
                           <label
                             key={option.id}
                             className="delivery-option"
-                            htmlFor={`delivery-${cartItem.productId}-${option.id}`}
                           >
                             <input
-                              id={`delivery-${cartItem.productId}-${option.id}`}
                               type="radio"
                               className="delivery-option-input"
                               name={`delivery-option-${cartItem.productId}`}
-                              checked={option.id === cartItem.deliveryOptionId}
+                              checked={option.id === selectedOption?.id}
                               onChange={() =>
-                                updateCartItem(cartItem.productId, {
-                                  deliveryOptionId: option.id,
-                                })
+                                selectDeliveryOption(
+                                  cartItem.productId,
+                                  option.id,
+                                )
                               }
                             />
                             <div>
                               <div className="delivery-option-date">
-                                {formatDeliveryDate(option.estimatedDeliveryTimeMs)}
+                                {formatDeliveryDate(
+                                  option.estimatedDeliveryTimeMs,
+                                )}
                               </div>
                               <div className="delivery-option-price">
                                 {option.priceCents === 0
                                   ? "FREE Shipping"
-                                  : `${formatPrice(option.priceCents)} - Shipping`}
+                                  : `${formatMoney(option.priceCents)} - Shipping`}
                               </div>
                             </div>
                           </label>
@@ -258,61 +221,53 @@ export function CheckoutPage() {
                       </div>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-
-            {paymentSummary && (
-              <div className="payment-summary">
-                <div className="payment-summary-title">Payment Summary</div>
-
-                <div className="payment-summary-row">
-                  <div>Items ({paymentSummary.totalItems}):</div>
-                  <div className="payment-summary-money">
-                    {formatPrice(paymentSummary.productCostCents)}
-                  </div>
-                </div>
-
-                <div className="payment-summary-row">
-                  <div>Shipping &amp; handling:</div>
-                  <div className="payment-summary-money">
-                    {formatPrice(paymentSummary.shippingCostCents)}
-                  </div>
-                </div>
-
-                <div className="payment-summary-row subtotal-row">
-                  <div>Total before tax:</div>
-                  <div className="payment-summary-money">
-                    {formatPrice(paymentSummary.totalCostBeforeTaxCents)}
-                  </div>
-                </div>
-
-                <div className="payment-summary-row">
-                  <div>Estimated tax (10%):</div>
-                  <div className="payment-summary-money">
-                    {formatPrice(paymentSummary.taxCents)}
-                  </div>
-                </div>
-
-                <div className="payment-summary-row total-row">
-                  <div>Order total:</div>
-                  <div className="payment-summary-money">
-                    {formatPrice(paymentSummary.totalCostCents)}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="place-order-button button-primary"
-                  disabled={isSubmittingOrder || cartItems.length === 0}
-                  onClick={placeOrder}
-                >
-                  {isSubmittingOrder ? "Placing order..." : "Place your order"}
-                </button>
-              </div>
+                );
+              })
             )}
           </div>
-        )}
+
+          <div className="payment-summary">
+            <div className="payment-summary-title">Payment Summary</div>
+            <div className="payment-summary-row">
+              <div>Items ({itemCount}):</div>
+              <div className="payment-summary-money">
+                {formatMoney(productCostCents)}
+              </div>
+            </div>
+            <div className="payment-summary-row">
+              <div>Shipping &amp; handling:</div>
+              <div className="payment-summary-money">
+                {formatMoney(shippingCostCents)}
+              </div>
+            </div>
+            <div className="payment-summary-row subtotal-row">
+              <div>Total before tax:</div>
+              <div className="payment-summary-money">
+                {formatMoney(totalCostBeforeTaxCents)}
+              </div>
+            </div>
+            <div className="payment-summary-row">
+              <div>Estimated tax (10%):</div>
+              <div className="payment-summary-money">
+                {formatMoney(taxCents)}
+              </div>
+            </div>
+            <div className="payment-summary-row total-row">
+              <div>Order total:</div>
+              <div className="payment-summary-money">
+                {formatMoney(totalCostCents)}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="place-order-button button-primary"
+              disabled={cartItems.length === 0 || isPlacingOrder}
+              onClick={placeOrder}
+            >
+              {isPlacingOrder ? "Placing order..." : "Place your order"}
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );
