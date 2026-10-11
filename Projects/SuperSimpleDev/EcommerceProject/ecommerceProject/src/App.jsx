@@ -15,7 +15,7 @@ function App() {
     const controller = new AbortController();
 
     axios
-      .get("/api/cart-items", {
+      .get("/api/cart-items?expand=product", {
         signal: controller.signal,
       })
       .then((response) => {
