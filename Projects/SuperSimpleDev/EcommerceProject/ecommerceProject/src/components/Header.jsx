@@ -1,7 +1,7 @@
 import './header.css'
 import { Link } from "react-router-dom";
 
-export function Header({ cartItems }) {
+export function Header({ cartItems = [] }) {
   //const cartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
   let cartQuantity = 0;
   

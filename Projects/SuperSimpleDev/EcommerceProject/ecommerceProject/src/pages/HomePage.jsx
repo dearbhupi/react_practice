@@ -3,19 +3,22 @@ import { Header } from "../components/Header";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-function HomePage() {
+function HomePage({ cartItems = [] }) {
   const [products, setProducts] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
 
     axios
-      .get("http://127.0.0.1:3000/api/products", {
+      .get("/api/products", {
         signal: controller.signal,
       })
       .then((response) => {
+        if (!Array.isArray(response.data)) {
+          throw new TypeError("Products API response must be an array.");
+        }
+
         setProducts(response.data);
       })
       .catch((requestError) => {
@@ -26,18 +29,7 @@ function HomePage() {
       });
 
 
-    axios
-      .get("http://127.0.0.1:3000/api/cart-items", {
-        signal: controller.signal,
-      })
-      .then((response) => {
-        setCartItems(response.data);
-      })
-      .catch((requestError) => {
-        if (controller.signal.aborted) return;
-
-        console.error("Error fetching cart items:", requestError);
-      });
+ 
 
     return () => controller.abort();
 
