@@ -23,6 +23,10 @@ This is the backend for the [ecommerce-project](https://github.com/SuperSimpleDe
   order creation clears the cart.
 - `POST /api/reset` restores the development starter data.
 
+Order history is intentionally cleared whenever the backend starts. The reset
+endpoint is separate and restores its development sample orders until the next
+backend restart.
+
 The backend's Express application is exported from `app.js` separately from
 `server.js`, allowing HTTP tests to start an isolated ephemeral server without
 triggering the development server or default-data initialization.

@@ -11,12 +11,21 @@ const testWorkingDirectory = await mkdtemp(
 );
 process.chdir(testWorkingDirectory);
 
-const [{ default: app }, { sequelize }, { Product }, { DeliveryOption }] =
+const [
+  { default: app },
+  { sequelize },
+  { Product },
+  { DeliveryOption },
+  { Order },
+  { initializeDatabase },
+] =
   await Promise.all([
     import('../app.js'),
     import('../models/index.js'),
     import('../models/Product.js'),
     import('../models/DeliveryOption.js'),
+    import('../models/Order.js'),
+    import('../initializeDatabase.js'),
   ]);
 const { defaultProducts } = await import('../defaultData/defaultProducts.js');
 const { defaultCart } = await import('../defaultData/defaultCart.js');
@@ -226,5 +235,28 @@ describe('ecommerce API', () => {
     assert.equal(result.status, 204);
     assert.equal((await request('/api/products')).data.length, defaultProducts.length);
     assert.equal((await request('/api/cart-items')).data.length, defaultCart.length);
+  });
+
+  it('clears order history on startup without reseeding sample orders', async () => {
+    await Order.create({
+      orderTimeMs: Date.now(),
+      totalCostCents: 1000,
+      products: [{ productId: productIds.mouse, quantity: 1 }],
+    });
+    assert.equal(await Order.count(), 1);
+
+    await initializeDatabase();
+
+    assert.equal(await Order.count(), 0);
+    assert.equal(await Product.count(), 3);
+  });
+
+  it('seeds the catalog on first startup but leaves order history empty', async () => {
+    await sequelize.sync({ force: true });
+
+    await initializeDatabase();
+
+    assert.equal(await Product.count(), defaultProducts.length);
+    assert.equal(await Order.count(), 0);
   });
 });
