@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 
 /** Displays one purchased product and forwards its buy-again action. */
-export function OrderProduct({ item, isAdding, onBuyAgain }) {
+export function OrderProduct({ orderId, item, isAdding, onBuyAgain }) {
   return (
     <>
       <div className="product-image-container">
@@ -34,7 +34,7 @@ export function OrderProduct({ item, isAdding, onBuyAgain }) {
 
       <div className="product-actions">
         <Link
-          to="/tracking"
+          to={`/tracking?orderId=${encodeURIComponent(orderId)}&productId=${encodeURIComponent(item.productId)}`}
           className="track-package-button button-secondary"
         >
           Track package

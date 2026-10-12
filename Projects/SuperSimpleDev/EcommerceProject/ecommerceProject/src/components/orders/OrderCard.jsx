@@ -29,6 +29,7 @@ export function OrderCard({ order, addingProductId, onBuyAgain }) {
         {order.products.map((item) => (
           <Fragment key={item.productId}>
             <OrderProduct
+              orderId={order.id}
               item={item}
               isAdding={addingProductId === item.productId}
               onBuyAgain={onBuyAgain}

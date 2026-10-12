@@ -11,7 +11,7 @@ import {
   getPaymentSummary,
   placeOrder,
 } from "../src/services/checkoutService.js";
-import { getOrders } from "../src/services/ordersService.js";
+import { getOrder, getOrders } from "../src/services/ordersService.js";
 import { getProducts } from "../src/services/productsService.js";
 import formatMoney from "../src/utils/money.js";
 
@@ -113,6 +113,19 @@ test("orders service loads expanded order history", async () => {
 
   mockResponse(null);
   await assert.rejects(getOrders(), /response must be an array/);
+});
+
+test("order service loads one expanded order for tracking", async () => {
+  const order = { id: "order-1", products: [{ productId: "p-1" }] };
+  mockResponse(order);
+
+  assert.deepEqual(await getOrder("order-1"), order);
+  assert.equal(lastRequest.url, "/api/orders/order-1?expand=products");
+
+  await assert.rejects(getOrder(""), /order ID is required/);
+
+  mockResponse({ id: "order-1" });
+  await assert.rejects(getOrder("order-1"), /response is invalid/);
 });
 
 test("money formatter renders cents as dollars", () => {
