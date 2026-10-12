@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A hands-on CSS Flexbox practice gallery using local animal photos.">
-  <title>Flexbox Animal Gallery</title>
+  <meta name="description" content="A playful, hands-on Flexbox playground for curious kids.">
+  <title>Flexbox Fun Lab</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,26 +15,31 @@
     </a>
     <nav class="main-nav" aria-label="Main navigation">
       <a href="#gallery">Gallery</a>
-      <a href="#flex-notes">Flexbox notes</a>
+      <a href="#word-playground">Word play</a>
     </nav>
     <a class="header-button" href="#gallery">Meet the animals <span aria-hidden="true">→</span></a>
   </header>
 
   <main>
     <section class="intro" aria-labelledby="page-title">
-      <p class="eyebrow">A little practice, a lot of cute</p>
-      <h1 id="page-title">Flex your <span>Flexbox</span> skills.</h1>
+      <p class="eyebrow">Welcome to the Flexbox Fun Lab!</p>
+      <h1 id="page-title">Let's play with <span>Flexbox!</span></h1>
       <p class="intro-copy">
-        A responsive animal gallery made with everyday Flexbox properties.
-        Resize the page and watch the cards rearrange themselves.
+        Flexbox is like a clever organizer: it helps boxes find their places.
+        Pick a setting, then watch the animals and words move!
       </p>
+      <div class="how-to-play" aria-label="How to play">
+        <span><b>1</b> Pick a setting</span>
+        <span><b>2</b> Watch things move</span>
+        <span><b>3</b> Try another!</span>
+      </div>
     </section>
 
     <section class="gallery-section" id="gallery" aria-labelledby="gallery-title">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Interactive playground</p>
-          <h2 id="gallery-title">Change a property. See what happens.</h2>
+          <h2 id="gallery-title">Your Flexbox playground</h2>
         </div>
         <p class="gallery-count">08 little wonders</p>
       </div>
@@ -44,8 +49,8 @@
           <form class="controls-panel" id="flex-controls">
             <div class="controls-heading">
               <div>
-                <h3>Flexbox controls</h3>
-                <p>Choose a value to update the preview instantly.</p>
+                <h3>Choose a superpower</h3>
+                <p>Pick from a menu and see your change right away.</p>
               </div>
               <button class="reset-button" type="reset">Reset</button>
             </div>
@@ -53,17 +58,17 @@
             <div class="controls-layout">
               <div class="controls-fields">
             <fieldset>
-            <legend>Container properties</legend>
+            <legend>Arrange the big box <span>(container)</span></legend>
             <div class="control-grid">
               <label class="control-field">
-                <span>display</span>
+                <span>display <small class="control-hint">How the big box joins the page</small></span>
                 <select name="display">
                   <option value="flex">flex</option>
                   <option value="inline-flex">inline-flex</option>
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-direction</span>
+                <span>flex-direction <small class="control-hint">Make a row or a column</small></span>
                 <select name="direction">
                   <option value="row">row</option>
                   <option value="row-reverse">row-reverse</option>
@@ -72,7 +77,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-wrap</span>
+                <span>flex-wrap <small class="control-hint">Let items move to a new line</small></span>
                 <select name="wrap">
                   <option value="wrap">wrap</option>
                   <option value="nowrap">nowrap</option>
@@ -80,7 +85,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>justify-content</span>
+                <span>justify-content <small class="control-hint">Spread items along the line</small></span>
                 <select name="justify">
                   <option value="flex-start">flex-start</option>
                   <option value="flex-end">flex-end</option>
@@ -91,7 +96,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>align-items</span>
+                <span>align-items <small class="control-hint">Line items up across the line</small></span>
                 <select name="alignItems">
                   <option value="stretch">stretch</option>
                   <option value="flex-start">flex-start</option>
@@ -101,7 +106,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>align-content</span>
+                <span>align-content <small class="control-hint">Arrange rows of items</small></span>
                 <select name="alignContent">
                   <option value="stretch">stretch</option>
                   <option value="flex-start">flex-start</option>
@@ -113,7 +118,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>gap</span>
+                <span>gap <small class="control-hint">Choose the space between items</small></span>
                 <select name="gap">
                   <option value="8px">8px</option>
                   <option value="16px">16px</option>
@@ -126,10 +131,10 @@
             </fieldset>
 
             <fieldset>
-            <legend>Item properties <span>(applied to every card)</span></legend>
+            <legend>Change the little boxes <span>(items inside)</span></legend>
             <div class="control-grid">
               <label class="control-field">
-                <span>flex-grow</span>
+                <span>flex-grow <small class="control-hint">Let items grow into spare room</small></span>
                 <select name="grow">
                   <option value="0" selected>0</option>
                   <option value="1">1</option>
@@ -137,14 +142,14 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-shrink</span>
+                <span>flex-shrink <small class="control-hint">Let items squeeze to fit</small></span>
                 <select name="shrink">
                   <option value="0">0</option>
                   <option value="1" selected>1</option>
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-basis</span>
+                <span>flex-basis <small class="control-hint">Pick an item's starting size</small></span>
                 <select name="basis">
                   <option value="150px">150px</option>
                   <option value="200px">200px</option>
@@ -154,7 +159,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>first card: order</span>
+                <span>first item: order <small class="control-hint">Move the first item in line</small></span>
                 <select name="order">
                   <option value="0" selected>0 (default)</option>
                   <option value="-1">-1</option>
@@ -163,7 +168,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>first card: align-self</span>
+                <span>first item: align-self <small class="control-hint">Move just one item across</small></span>
                 <select name="alignSelf">
                   <option value="auto" selected>auto</option>
                   <option value="flex-start">flex-start</option>
@@ -179,7 +184,7 @@
             <section class="behavior-preview" aria-live="polite">
               <div class="behavior-icon" aria-hidden="true">↗</div>
               <div>
-                <span class="behavior-title">What to expect</span>
+                <span class="behavior-title">What will happen?</span>
                 <p id="behavior-output"></p>
               </div>
             </section>
@@ -199,8 +204,8 @@
 
         <div class="preview-panel" id="preview-panel">
           <div class="preview-heading">
-            <span>Live preview</span>
-            <span class="resize-hint">Drag the bottom-right corner to resize</span>
+            <span>Animal friends</span>
+            <span class="resize-hint">Drag the bottom-right corner to make this box bigger or smaller</span>
           </div>
           <div class="animal-gallery" id="animal-gallery">
         <article class="animal-card animal-card--medium is-target" data-animal="Sunny">
@@ -243,10 +248,30 @@
         </div>
 
         <div class="preview-details">
+          <section class="word-playground" id="word-playground" aria-labelledby="word-playground-title">
+            <div class="word-playground-heading">
+              <span class="word-icon" aria-hidden="true">🔤</span>
+              <div>
+                <p class="eyebrow">Words can move too!</p>
+                <h2 id="word-playground-title">Make a word train</h2>
+                <p>These word cards use the same settings as the animal friends above.</p>
+              </div>
+            </div>
+            <div class="word-gallery" id="word-gallery" aria-label="Flexbox word example">
+              <span class="word-piece word-piece--one">Flexbox</span>
+              <span class="word-piece word-piece--two">helps</span>
+              <span class="word-piece word-piece--three">words</span>
+              <span class="word-piece word-piece--four">find</span>
+              <span class="word-piece word-piece--five">their</span>
+              <span class="word-piece word-piece--six">places!</span>
+            </div>
+            <p class="word-tip" id="word-tip" aria-live="polite">Try changing the direction: the word train can go across or stack up!</p>
+          </section>
+
           <aside class="flex-notes" id="flex-notes">
             <div class="notes-icon" aria-hidden="true">✦</div>
             <div>
-              <h2>What makes the cards flex?</h2>
+              <h2>Flexbox in a nutshell</h2>
               <p id="preview-explanation" aria-live="polite"></p>
             </div>
           </aside>
@@ -258,8 +283,8 @@
   </main>
 
   <footer class="site-footer">
-    <span>Made for curious minds and tiny paws.</span>
-    <span>Flexbox practice · 2026</span>
+    <span>Made for curious minds and tiny paws. Keep experimenting!</span>
+    <span>Flexbox Fun Lab</span>
   </footer>
   <script src="flexbox.js" defer></script>
 </body>

@@ -1,76 +1,82 @@
 const controls = document.querySelector("#flex-controls");
 const gallery = document.querySelector("#animal-gallery");
+const wordGallery = document.querySelector("#word-gallery");
 const previewPanel = document.querySelector("#preview-panel");
 const cards = [...gallery.querySelectorAll(".animal-card")];
+const wordPieces = [...wordGallery.querySelectorAll(".word-piece")];
 const cssOutput = document.querySelector("#css-output");
 const behaviorOutput = document.querySelector("#behavior-output");
 const previewExplanation = document.querySelector("#preview-explanation");
+const wordTip = document.querySelector("#word-tip");
 const inlineContextNote = document.querySelector("#inline-context-note");
 
 const displayDescriptions = {
-  flex: "display: flex makes the gallery a block-level flex container: it fills the available row, so neighboring content starts below it.",
+  flex: "The big box stretches across its row, so the next thing starts below it.",
   "inline-flex":
-    "display: inline-flex makes the gallery an inline-level flex container: it sizes around its contents and can share a line with neighboring content. The cards inside still use Flexbox.",
+    "The big box hugs its contents and can share a line with a neighbor.",
 };
 
-const alignDescriptions = {
-  stretch: "Items stretch to fill available cross-axis space.",
-  "flex-start": "Items line up at the start of the cross axis.",
-  "flex-end": "Items line up at the end of the cross axis.",
-  center: "Items line up in the center of the cross axis.",
-  baseline: "Items align their text baselines.",
-  auto: "The first card follows the container's align-items setting.",
+const wordTips = {
+  display: "Watch the word playground's big box change how it sits on the page.",
+  direction: "Try changing the direction: the word train can go across or stack up!",
+  wrap: "Try wrap: the word cards can hop onto a new line when they run out of room.",
+  justify: "Try each choice: it moves the word train along its line or stack.",
+  alignItems: "Try each choice: it lines the word cards up across their line.",
+  alignContent: "When there are several lines, this moves the lines around together.",
+  gap: "Try a bigger gap: the word cards get more breathing room!",
+  grow: "Try a bigger grow number: the word cards stretch to fill spare room.",
+  shrink: "Make the preview narrow to see if the word cards can squeeze smaller.",
+  basis: "Try a new starting size and watch the word cards change width.",
+  order: "Move the first word card to a new spot in the train.",
+  alignSelf: "Move just the first word card across its line.",
 };
 
 const expectedBehaviors = {
   display: (get) =>
     get("display") === "inline-flex"
-      ? "The gallery becomes inline-sized, allowing neighboring content to sit beside it."
-      : "The gallery fills its row, so neighboring content starts below it.",
+      ? "The big box hugs its contents and can share a line with a neighbor."
+      : "The big box stretches across its row; the next thing starts below.",
   direction: (get) =>
     get("direction").includes("column")
-      ? `Cards stack ${get("direction") === "column" ? "top to bottom" : "bottom to top"}; the main axis is vertical, so justify-content moves them vertically.`
-      : `Cards flow ${get("direction") === "row" ? "left to right" : "right to left"}; the main axis is horizontal, so justify-content moves them horizontally.`,
+      ? `Items make a ${get("direction") === "column" ? "top-to-bottom" : "bottom-to-top"} stack.`
+      : `Items make a ${get("direction") === "row" ? "left-to-right" : "right-to-left"} line.`,
   wrap: (get) =>
     get("wrap") === "nowrap"
-      ? "All cards stay on one line and may overflow the preview."
-      : `Cards can wrap ${get("wrap") === "wrap-reverse" ? "in reverse cross-axis order" : "onto new lines"}.`,
+      ? "All items stay in one line, even if they run out of room."
+      : `Items can move onto new lines${get("wrap") === "wrap-reverse" ? " in reverse order" : ""}.`,
   justify: (get) => {
     const effects = {
-      "flex-start": "Cards gather at the start",
-      "flex-end": "Cards gather at the end",
-      center: "Cards gather in the center",
-      "space-between": "Free space goes between cards",
-      "space-around": "Free space goes around cards",
-      "space-evenly": "Free space is evenly distributed",
+      "flex-start": "Items gather at the start",
+      "flex-end": "Items gather at the end",
+      center: "Items gather in the middle",
+      "space-between": "Extra space goes between items",
+      "space-around": "Extra space goes around items",
+      "space-evenly": "Extra space is shared evenly",
     };
-    const axis = get("direction").includes("column") ? "column" : "row";
-    const growth =
-      get("grow") === "0"
-        ? "flex-grow 0 leaves free space visible."
-        : "Set flex-grow to 0 to see the spacing.";
-    return `${effects[get("justify")]} along the ${axis}; ${growth}`;
+    const axis = get("direction").includes("column") ? "stack" : "line";
+    const growth = get("grow") === "0" ? "" : " Set grow to 0 to see the spacing.";
+    return `${effects[get("justify")]} along the ${axis}.${growth}`;
   },
   alignItems: (get) =>
-    `Different-height cards align at ${get("alignItems")} across each row.`,
+    `Items line up across the row using “${get("alignItems")}”.`,
   alignContent: (get) =>
-    `Multiple rows are positioned at ${get("alignContent")} in the gallery.`,
-  gap: (get) => `The space between cards and rows is ${get("gap")}.`,
+    `Rows of items gather using “${get("alignContent")}”.`,
+  gap: (get) => `There will be ${get("gap")} of space between items.`,
   grow: (get) =>
     get("grow") === "0"
-      ? "Cards keep their basis width, leaving free space for justify-content."
-      : `Cards grow to use extra row space (flex-grow: ${get("grow")}).`,
+      ? "Items stay their starting size, leaving room to spread them out."
+      : `Items grow to fill extra room (grow: ${get("grow")}).`,
   shrink: (get) =>
     get("shrink") === "0"
-      ? "Cards refuse to shrink and may overflow when the row is crowded."
-      : "Cards can shrink to fit when the row is crowded.",
-  basis: (get) => `Each card starts at a flex-basis of ${get("basis")}.`,
+      ? "Items won't squeeze smaller, so they may spill out."
+      : "Items can squeeze smaller to fit.",
+  basis: (get) => `Each item starts at ${get("basis")} wide.`,
   order: (get) =>
     get("order") === "0"
-      ? "Sunny stays in its original position."
-      : `Sunny moves to order ${get("order")}; lower order values appear first.`,
+      ? "The first item stays in its usual place."
+      : `The first item moves to spot ${get("order")}.`,
   alignSelf: (get) =>
-    `Sunny aligns at ${get("alignSelf")} independently of the other cards.`,
+    `The first item lines up by itself using “${get("alignSelf")}”.`,
 };
 
 function updatePreview(event) {
@@ -87,30 +93,51 @@ function updatePreview(event) {
   gallery.classList.toggle("is-inline-flex", get("display") === "inline-flex");
   inlineContextNote.hidden = get("display") !== "inline-flex";
 
+  wordGallery.style.display = get("display");
+  wordGallery.style.flexDirection = get("direction");
+  wordGallery.style.flexWrap = get("wrap");
+  wordGallery.style.justifyContent = get("justify");
+  wordGallery.style.alignItems = get("alignItems");
+  wordGallery.style.alignContent = get("alignContent");
+  wordGallery.style.gap = get("gap");
+
   for (const card of cards) {
     card.style.flexGrow = get("grow");
     card.style.flexShrink = get("shrink");
     card.style.flexBasis = get("basis");
   }
 
+  for (const piece of wordPieces) {
+    piece.style.flexGrow = get("grow");
+    piece.style.flexShrink = get("shrink");
+    piece.style.flexBasis = get("basis");
+  }
+
   cards[0].style.order = get("order");
   cards[0].style.alignSelf = get("alignSelf");
+  wordPieces[0].style.order = get("order");
+  wordPieces[0].style.alignSelf = get("alignSelf");
+
+  const changedControl = event?.target?.name ?? "direction";
+  wordTip.textContent =
+    changedControl === "direction" && get("direction").includes("column")
+      ? "Look! The word cards stack up and down. Try justify-content to move the whole word train."
+      : wordTips[changedControl] ?? wordTips.direction;
 
   const orderDescription =
     get("order") === "0"
-      ? "Sunny stays in its natural position."
-      : `Sunny moves to order ${get("order")}; lower order values appear first.`;
+      ? "The first animal and word stay in their usual places."
+      : `The first animal and word move to spot ${get("order")}.`;
 
-  const changedControl = event?.target?.name;
   behaviorOutput.textContent = expectedBehaviors[changedControl]
     ? expectedBehaviors[changedControl](get)
     : expectedBehaviors.justify(get);
 
   previewExplanation.textContent = [
-    `${displayDescriptions[get("display")]} flex-direction: ${get("direction")} means ${get("direction").includes("column") ? "cards stack vertically" : "cards line up horizontally"}.`,
-    `With flex-wrap: ${get("wrap")}, ${get("wrap") === "nowrap" ? "cards stay on one line and may overflow" : "cards can move onto additional lines"}.`,
-    `justify-content: ${get("justify")} positions cards along the main axis; align-items: ${get("alignItems")} positions differently sized cards across it. The short, medium, and tall photo cards make center and flex-end easy to compare. align-content: ${get("alignContent")} positions rows when there is extra cross-axis space.`,
-    `Each card uses flex: ${get("grow")} ${get("shrink")} ${get("basis")}, with a ${get("gap")} gap. ${orderDescription} align-self: ${get("alignSelf")} controls Sunny's individual alignment.`,
+    `${displayDescriptions[get("display")]} The items ${get("direction").includes("column") ? "stack up and down" : "line up side by side"}.`,
+    `${get("wrap") === "nowrap" ? "Items stay together in one long line" : "Items can hop onto new lines"}; justify-content moves them along the line and align-items lines them up across it.`,
+    `The different-height animal pictures help you compare alignment. Rows use align-content: ${get("alignContent")}, and the space between items is ${get("gap")}.`,
+    `Each item starts at ${get("basis")} and can grow or shrink. ${orderDescription} The first item can also line up by itself with align-self: ${get("alignSelf")}.`,
   ].join(" ");
 
   cssOutput.textContent = [
@@ -124,7 +151,21 @@ function updatePreview(event) {
     `  gap: ${get("gap")};`,
     `}`,
     ``,
+    `.word-gallery {`,
+    `  display: ${get("display")};`,
+    `  flex-direction: ${get("direction")};`,
+    `  flex-wrap: ${get("wrap")};`,
+    `  justify-content: ${get("justify")};`,
+    `  align-items: ${get("alignItems")};`,
+    `  align-content: ${get("alignContent")};`,
+    `  gap: ${get("gap")};`,
+    `}`,
+    ``,
     `.animal-card {`,
+    `  flex: ${get("grow")} ${get("shrink")} ${get("basis")};`,
+    `}`,
+    ``,
+    `.word-piece {`,
     `  flex: ${get("grow")} ${get("shrink")} ${get("basis")};`,
     `}`,
     ``,
@@ -133,6 +174,11 @@ function updatePreview(event) {
     `.animal-card--tall .animal-photo { height: 270px; }`,
     ``,
     `.animal-card:first-child {`,
+    `  order: ${get("order")};`,
+    `  align-self: ${get("alignSelf")};`,
+    `}`,
+    ``,
+    `.word-piece:first-child {`,
     `  order: ${get("order")};`,
     `  align-self: ${get("alignSelf")};`,
     `}`,
