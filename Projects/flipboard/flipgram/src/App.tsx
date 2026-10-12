@@ -8,6 +8,26 @@ import type { Article } from './types'
 import './App.css'
 
 const pageSize = 5
+
+function getSourceGroup(url: URL) {
+  const host = url.hostname.replace(/^www\./, '')
+  const source = host === 'youtu.be' || host.endsWith('youtube.com')
+    ? 'YouTube'
+    : host.endsWith('facebook.com')
+      ? 'Facebook'
+      : host === 'x.com' || host.endsWith('twitter.com')
+        ? 'X'
+        : host.endsWith('linkedin.com')
+          ? 'LinkedIn'
+          : host
+  const category = ['YouTube', 'X', 'Facebook', 'LinkedIn'].includes(source)
+    ? source
+    : /python|morioh/i.test(url.href)
+      ? 'Python Programming'
+      : 'Shared links'
+  return { source, category }
+}
+
 function parseSharedLinks(text: string): Article[] {
   return text.split(/\r?\n/).flatMap((line, lineIndex) => {
     const dateText = line.match(/^\[([^\]]+)\]/)?.[1]
@@ -24,25 +44,7 @@ function parseSharedLinks(text: string): Article[] {
 
       if (!['http:', 'https:'].includes(parsedUrl.protocol)) return []
 
-      const host = parsedUrl.hostname.replace(/^www\./, '')
-      const source = host === 'youtu.be' || host.endsWith('youtube.com')
-        ? 'YouTube'
-        : host.endsWith('facebook.com')
-          ? 'Facebook'
-          : host === 'x.com'
-            ? 'X'
-            : host.endsWith('linkedin.com')
-              ? 'LinkedIn'
-              : host
-      const category = source === 'YouTube'
-        ? 'Videos'
-        : source === 'LinkedIn'
-          ? 'Career'
-          : source === 'X' || source === 'Facebook'
-            ? 'Shared links'
-            : /python|morioh/i.test(cleanUrl)
-              ? 'Python Programming'
-              : 'Shared links'
+      const { source, category } = getSourceGroup(parsedUrl)
 
       const date = dateText ? new Date(dateText.replace(/\u202f/g, ' ')) : new Date(Number.NaN)
       const publishedAt = Number.isNaN(date.valueOf()) ? '2024-01-01' : date.toISOString().slice(0, 10)
@@ -103,7 +105,7 @@ function formatDate(date: string) {
 
 function storyFromUrl(url: string): Article {
   const parsedUrl = new URL(url)
-  const source = parsedUrl.hostname.replace(/^www\./, '')
+  const { source, category } = getSourceGroup(parsedUrl)
   const publisher = source.split('.')[0]
   const publisherName = publisher.charAt(0).toUpperCase() + publisher.slice(1)
   const videoId = getYouTubeVideoId(parsedUrl)
@@ -118,12 +120,27 @@ function storyFromUrl(url: string): Article {
     excerpt: videoId
       ? 'A YouTube video from your collection. Select the preview to play it.'
       : 'Preview details are not available yet. Open the direct link to view the original story.',
-    category: 'Your links',
+    category,
     readTime: 'Open link',
     style: 'compact',
     accent: '#ddd0bd',
     directLink: true,
     videoEmbedUrl: videoId ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}` : undefined,
+  }
+}
+
+type StoredLink = {
+  id: string
+  url: string
+  addedAt: string
+}
+
+function storyFromStoredLink(link: StoredLink): Article {
+  const article = storyFromUrl(link.url)
+  return {
+    ...article,
+    id: link.id,
+    publishedAt: link.addedAt.slice(0, 10),
   }
 }
 
@@ -195,11 +212,12 @@ function Header({
   )
 }
 
-function AddLinkForm({ onAdd }: { onAdd: (article: Article) => void }) {
+function AddLinkForm({ onAdd }: { onAdd: (url: string) => Promise<void> }) {
   const [url, setUrl] = useState('')
   const [message, setMessage] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     try {
       const parsedUrl = new URL(url.trim())
@@ -207,11 +225,16 @@ function AddLinkForm({ onAdd }: { onAdd: (article: Article) => void }) {
         setMessage('Please use a link that starts with http:// or https://')
         return
       }
-      onAdd(storyFromUrl(parsedUrl.href))
+      setIsSaving(true)
+      await onAdd(parsedUrl.href)
       setUrl('')
       setMessage('Added to your magazine!')
-    } catch {
-      setMessage('That link does not look quite right yet.')
+    } catch (error) {
+      setMessage(error instanceof Error && !(error instanceof TypeError)
+        ? error.message
+        : 'We could not save that link. Check that the app is running and try again.')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -221,7 +244,7 @@ function AddLinkForm({ onAdd }: { onAdd: (article: Article) => void }) {
       <form className="add-link-form" onSubmit={handleSubmit}>
         <label className="sr-only" htmlFor="article-url">Paste an article URL</label>
         <input id="article-url" type="url" placeholder="Paste a story link…" value={url} onChange={(event) => { setUrl(event.target.value); setMessage('') }} required />
-        <button type="submit">Add to magazine <span aria-hidden="true">↗</span></button>
+        <button type="submit" disabled={isSaving}>{isSaving ? 'Saving…' : 'Add to magazine'} <span aria-hidden="true">↗</span></button>
         {message && <span className="add-link-message" role="status">{message}</span>}
       </form>
     </section>
@@ -239,6 +262,30 @@ function App() {
   const [activeArticle, setActiveArticle] = useState<Article | null>(null)
   const [announcement, setAnnouncement] = useState('')
   const touchStart = useRef<{ x: number; y: number } | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/links')
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`Loading saved links failed (${response.status}).`)
+        return response.json() as Promise<StoredLink[]>
+      })
+      .then((links) => {
+        if (cancelled) return
+        const loadedArticles = [...links].reverse().map(storyFromStoredLink)
+        setAllArticles((current) => [
+          ...loadedArticles.filter((article) => !current.some((existing) => existing.url === article.url)),
+          ...current,
+        ])
+        setSavedIds((current) => new Set([...current, ...loadedArticles.map((article) => article.id)]))
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+        console.error('Could not load saved links:', error)
+        setAnnouncement('Your saved links could not be loaded. Restart the app and try again.')
+      })
+    return () => { cancelled = true }
+  }, [])
 
   const categories = useMemo(() => [
     'For You',
@@ -320,10 +367,20 @@ function App() {
     }
   }
 
-  function addArticle(article: Article) {
-    setAllArticles((current) => [article, ...current])
+  async function addArticle(url: string) {
+    const response = await fetch('/api/links', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    })
+    const result = await response.json() as { link?: StoredLink; error?: string }
+    if (!response.ok || !result.link) {
+      throw new Error(result.error ?? `Saving the link failed (${response.status}).`)
+    }
+    const article = storyFromStoredLink(result.link)
+    setAllArticles((current) => [article, ...current.filter((existing) => existing.url !== article.url)])
     setSavedIds((current) => new Set(current).add(article.id))
-    setCategory('Your links')
+    setCategory(article.category)
     setQuery('')
     setPage(0)
     setAnnouncement('Your link was added to the magazine.')

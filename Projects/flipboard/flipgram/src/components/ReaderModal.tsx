@@ -49,9 +49,13 @@ export function ReaderModal({ article, saved, onClose, onSave, onShare }: Reader
         </div>
         <div className="reader-modal-scroll">
           {story.videoEmbedUrl
-            ? <div className="reader-modal-player"><iframe src={`${story.videoEmbedUrl}?autoplay=1&rel=0`} title={`Play ${story.title}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div>
+            ? <div className="reader-modal-player"><iframe src={`${story.videoEmbedUrl}?autoplay=1&rel=0`} title={`Play ${story.title}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen /></div>
             : <img className="reader-modal-image" src={story.image} alt="" />}
-          <div className="reader-modal-copy">
+          {story.directLink ? (
+            <a className="reader-source-link reader-source-link--direct" href={story.url} target="_blank" rel="noreferrer">
+              Open on YouTube<span aria-hidden="true">↗</span>
+            </a>
+          ) : <div className="reader-modal-copy">
             <div className="reader-modal-meta"><span>{story.category}</span><i />{story.readTime}{loading && <small>UPDATING PREVIEW</small>}</div>
             <h2 id="reader-title">{story.title}</h2>
             <div className="reader-byline">
@@ -64,7 +68,7 @@ export function ReaderModal({ article, saved, onClose, onSave, onShare }: Reader
               : `Continue reading on ${story.source} for the complete story.`}</p>
             {error && <p className="reader-preview-error" role="status">Showing the saved preview. {error}</p>}
             <a className="reader-source-link" href={story.url} target="_blank" rel="noreferrer">{story.videoEmbedUrl ? 'Open on YouTube' : `Read the full story at ${story.source}`}<span aria-hidden="true">↗</span></a>
-          </div>
+          </div>}
         </div>
       </article>
     </div>

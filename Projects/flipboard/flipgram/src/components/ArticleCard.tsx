@@ -16,6 +16,23 @@ export function ArticleCard({ article, saved, onOpen, onSave, onShare }: Article
     article.directLink ? 'article-card--direct-link' : '',
     article.directLink && preview.title === article.url ? 'article-card--url-fallback' : '',
   ].filter(Boolean).join(' ')
+  const previewHost = new URL(preview.url).hostname.replace(/^www\./, '')
+  const directLinkContent = (
+    <>
+      {preview.image
+        ? <img className="article-image" src={preview.image} alt="" loading="lazy" />
+        : <span className="direct-preview-fallback" aria-hidden="true">
+            <span className="direct-preview-mark">{previewHost.charAt(0).toUpperCase()}</span>
+            <span>{previewHost}</span>
+          </span>}
+      {preview.videoEmbedUrl && (
+        <span className="direct-preview-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M9 6.5v11l9-5.5-9-5.5Z" /></svg>
+        </span>
+      )}
+      <span className="sr-only">{preview.videoEmbedUrl ? `Play video from ${previewHost}` : `Open link from ${previewHost}`}</span>
+    </>
+  )
   const cardContent = (
     <>
       {preview.image && (preview.style !== 'note' || preview.videoEmbedUrl) && <img className="article-image" src={preview.image} alt="" loading="lazy" />}
@@ -35,8 +52,8 @@ export function ArticleCard({ article, saved, onOpen, onSave, onShare }: Article
   return (
     <article className={`article-card ${articleClasses}`} style={{ '--article-accent': article.accent } as React.CSSProperties}>
       {preview.videoEmbedUrl
-        ? <button className="article-open" type="button" onClick={() => onOpen(preview)} aria-label={`Play YouTube video: ${preview.title}`}>{cardContent}</button>
-        : <a className="article-open" href={preview.url} target="_blank" rel="noreferrer" aria-label={`Open story from ${preview.source} in a new tab: ${preview.title}`}>{cardContent}</a>}
+        ? <button className="article-open" type="button" onClick={() => onOpen(preview)} aria-label={`Play video from ${previewHost}`}>{article.directLink ? directLinkContent : cardContent}</button>
+        : <a className="article-open" href={preview.url} target="_blank" rel="noreferrer" aria-label={`Open link from ${previewHost} in a new tab`}>{article.directLink ? directLinkContent : cardContent}</a>}
       <div className="article-actions" aria-label={`Actions for ${preview.title}`}>
         <button type="button" className={`icon-button ${saved ? 'is-saved' : ''}`} aria-label={saved ? 'Remove bookmark' : 'Add to magazine'} title={saved ? 'Remove bookmark' : 'Add to magazine'} onClick={() => onSave(preview)}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-4-6 4V4.75Z" /></svg>

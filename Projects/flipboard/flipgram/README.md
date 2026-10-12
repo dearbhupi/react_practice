@@ -11,6 +11,11 @@ npm install
 npm run dev
 ```
 
+`npm run dev` starts both the Vite app and a small local API. Links added with
+“Paste a story link” are saved to `../data/user-links.json` and restored when
+the app starts again. The original `../data/links.txt` is read-only and is not
+modified. Keep the API process running while using the app.
+
 Useful checks:
 
 ```sh
@@ -48,9 +53,10 @@ The endpoint should return JSON with this shape:
 ```
 
 The metadata request runs for visible cards and when a reader opens a story.
-Without the service, shared-link cards show the direct URL instead of an
-invented title. Fields are optional; any missing values keep the story's saved
-fallback. The API endpoint must validate and safely fetch URLs server-side (including
+Without the service, shared-link cards use a simple publisher tile instead of
+inventing story metadata. Link cards focus on the preview image, with a play
+control for YouTube. Fields are optional; any missing values keep the story's
+saved fallback. The API endpoint must validate and safely fetch URLs server-side (including
 restricting private-network and non-HTTP targets) before scraping metadata.
 Preview-service failures are shown in the reader while the saved preview stays
 available.
