@@ -7,7 +7,7 @@ import { CheckoutHeader } from "../components/checkout/CheckoutHeader";
 import { OrderSummary } from "../components/checkout/OrderSummary";
 import { PaymentSummary } from "../components/checkout/PaymentSummary";
 
-export function CheckoutPage({ cartItems = [] }) {
+export function CheckoutPage({ cartItems = [], onOrderPlaced }) {
   const navigate = useNavigate();
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState({});
@@ -77,6 +77,7 @@ export function CheckoutPage({ cartItems = [] }) {
 
     try {
       await axios.post("/api/orders");
+      onOrderPlaced?.();
       navigate("/orders");
     } catch (requestError) {
       console.error("Error placing order:", requestError);
