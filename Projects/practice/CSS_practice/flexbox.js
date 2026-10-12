@@ -82,6 +82,12 @@ const expectedBehaviors = {
 function updatePreview(event) {
   const values = new FormData(controls);
   const get = (name) => values.get(name);
+  const isColumn = get("direction").includes("column");
+  const wordBasis = isColumn
+    ? get("basis") === "40%"
+      ? "60px"
+      : `${Math.round(Number.parseFloat(get("basis")) / 4)}px`
+    : get("basis");
 
   gallery.style.display = get("display");
   gallery.style.flexDirection = get("direction");
@@ -100,6 +106,7 @@ function updatePreview(event) {
   wordGallery.style.alignItems = get("alignItems");
   wordGallery.style.alignContent = get("alignContent");
   wordGallery.style.gap = get("gap");
+  wordGallery.classList.toggle("is-column", isColumn);
 
   for (const card of cards) {
     card.style.flexGrow = get("grow");
@@ -110,7 +117,7 @@ function updatePreview(event) {
   for (const piece of wordPieces) {
     piece.style.flexGrow = get("grow");
     piece.style.flexShrink = get("shrink");
-    piece.style.flexBasis = get("basis");
+    piece.style.flexBasis = wordBasis;
   }
 
   cards[0].style.order = get("order");
@@ -121,7 +128,7 @@ function updatePreview(event) {
   const changedControl = event?.target?.name ?? "direction";
   wordTip.textContent =
     changedControl === "direction" && get("direction").includes("column")
-      ? "Look! The word cards stack up and down. Try justify-content to move the whole word train."
+      ? "Look! The word cards stack up and down. They use a smaller starting size so you can see the whole stack."
       : wordTips[changedControl] ?? wordTips.direction;
 
   const orderDescription =
@@ -137,7 +144,7 @@ function updatePreview(event) {
     `${displayDescriptions[get("display")]} The items ${get("direction").includes("column") ? "stack up and down" : "line up side by side"}.`,
     `${get("wrap") === "nowrap" ? "Items stay together in one long line" : "Items can hop onto new lines"}; justify-content moves them along the line and align-items lines them up across it.`,
     `The different-height animal pictures help you compare alignment. Rows use align-content: ${get("alignContent")}, and the space between items is ${get("gap")}.`,
-    `Each item starts at ${get("basis")} and can grow or shrink. ${orderDescription} The first item can also line up by itself with align-self: ${get("alignSelf")}.`,
+    `Animal cards start at ${get("basis")}; word cards start at ${wordBasis}${isColumn ? " to make the word stack easy to see" : ""}. Items can grow or shrink. ${orderDescription} The first item can also line up by itself with align-self: ${get("alignSelf")}.`,
   ].join(" ");
 
   cssOutput.textContent = [
@@ -166,7 +173,7 @@ function updatePreview(event) {
     `}`,
     ``,
     `.word-piece {`,
-    `  flex: ${get("grow")} ${get("shrink")} ${get("basis")};`,
+    `  flex: ${get("grow")} ${get("shrink")} ${wordBasis};`,
     `}`,
     ``,
     `.animal-card--short .animal-photo { height: 140px; }`,

@@ -316,11 +316,53 @@ h1 span {
 }
 
 .control-hint {
-  display: block;
-  margin-top: 2px;
-  color: var(--muted);
+  position: relative;
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e6efdf;
+  color: var(--green-dark);
   font-size: 10px;
-  font-weight: 500;
+  font-style: normal;
+  font-weight: 800;
+  vertical-align: 1px;
+  cursor: help;
+}
+
+.control-hint::after {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  max-width: min(250px, 75vw);
+  padding: 9px 11px;
+  border: 1px solid #dce9d7;
+  border-radius: 8px;
+  background: #263b2e;
+  box-shadow: 0 5px 14px rgb(31 45 36 / 18%);
+  color: #fffefa;
+  content: attr(data-tooltip);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.5;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-3px);
+  transition: opacity 120ms ease, transform 120ms ease;
+  visibility: hidden;
+  white-space: normal;
+}
+
+.control-hint:hover::after,
+.control-hint:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
 }
 
 .control-field select {
@@ -457,6 +499,10 @@ h1 span {
   background-color: #fcf8ef;
   background-image: radial-gradient(#e8ddca 0.8px, transparent 0.8px);
   background-size: 17px 17px;
+}
+
+.word-gallery.is-column {
+  height: 620px;
 }
 
 .word-piece {

@@ -52,7 +52,7 @@
                 <h3>Choose a superpower</h3>
                 <p>Pick from a menu and see your change right away.</p>
               </div>
-              <button class="reset-button" type="reset">Reset</button>
+              <button class="reset-button" type="reset" title="Put the animal and word demos back to their starting settings.">Reset</button>
             </div>
 
             <div class="controls-layout">
@@ -61,14 +61,14 @@
             <legend>Arrange the big box <span>(container)</span></legend>
             <div class="control-grid">
               <label class="control-field">
-                <span>display <small class="control-hint">How the big box joins the page</small></span>
+                <span>display <small class="control-hint" data-tooltip="Choose whether the big box fills a row or sits beside other things." role="img" aria-label="Help: Choose whether the big box fills a row or sits beside other things." tabindex="0">?</small></span>
                 <select name="display">
                   <option value="flex">flex</option>
                   <option value="inline-flex">inline-flex</option>
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-direction <small class="control-hint">Make a row or a column</small></span>
+                <span>flex-direction <small class="control-hint" data-tooltip="Choose whether items line up in a row or stack in a column." role="img" aria-label="Help: Choose whether items line up in a row or stack in a column." tabindex="0">?</small></span>
                 <select name="direction">
                   <option value="row">row</option>
                   <option value="row-reverse">row-reverse</option>
@@ -77,7 +77,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-wrap <small class="control-hint">Let items move to a new line</small></span>
+                <span>flex-wrap <small class="control-hint" data-tooltip="Choose if items can hop onto another line when space runs out." role="img" aria-label="Help: Choose if items can hop onto another line when space runs out." tabindex="0">?</small></span>
                 <select name="wrap">
                   <option value="wrap">wrap</option>
                   <option value="nowrap">nowrap</option>
@@ -85,7 +85,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>justify-content <small class="control-hint">Spread items along the line</small></span>
+                <span>justify-content <small class="control-hint" data-tooltip="Move or spread items along their row or column." role="img" aria-label="Help: Move or spread items along their row or column." tabindex="0">?</small></span>
                 <select name="justify">
                   <option value="flex-start">flex-start</option>
                   <option value="flex-end">flex-end</option>
@@ -96,7 +96,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>align-items <small class="control-hint">Line items up across the line</small></span>
+                <span>align-items <small class="control-hint" data-tooltip="Line items up across the row or column." role="img" aria-label="Help: Line items up across the row or column." tabindex="0">?</small></span>
                 <select name="alignItems">
                   <option value="stretch">stretch</option>
                   <option value="flex-start">flex-start</option>
@@ -106,7 +106,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>align-content <small class="control-hint">Arrange rows of items</small></span>
+                <span>align-content <small class="control-hint" data-tooltip="Move or spread the rows when items wrap onto more than one line." role="img" aria-label="Help: Move or spread the rows when items wrap onto more than one line." tabindex="0">?</small></span>
                 <select name="alignContent">
                   <option value="stretch">stretch</option>
                   <option value="flex-start">flex-start</option>
@@ -118,7 +118,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>gap <small class="control-hint">Choose the space between items</small></span>
+                <span>gap <small class="control-hint" data-tooltip="Choose how much empty space goes between items." role="img" aria-label="Help: Choose how much empty space goes between items." tabindex="0">?</small></span>
                 <select name="gap">
                   <option value="8px">8px</option>
                   <option value="16px">16px</option>
@@ -134,7 +134,7 @@
             <legend>Change the little boxes <span>(items inside)</span></legend>
             <div class="control-grid">
               <label class="control-field">
-                <span>flex-grow <small class="control-hint">Let items grow into spare room</small></span>
+                <span>flex-grow <small class="control-hint" data-tooltip="Let items stretch to use extra room." role="img" aria-label="Help: Let items stretch to use extra room." tabindex="0">?</small></span>
                 <select name="grow">
                   <option value="0" selected>0</option>
                   <option value="1">1</option>
@@ -142,14 +142,14 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-shrink <small class="control-hint">Let items squeeze to fit</small></span>
+                <span>flex-shrink <small class="control-hint" data-tooltip="Let items squeeze smaller when space is tight." role="img" aria-label="Help: Let items squeeze smaller when space is tight." tabindex="0">?</small></span>
                 <select name="shrink">
                   <option value="0">0</option>
                   <option value="1" selected>1</option>
                 </select>
               </label>
               <label class="control-field">
-                <span>flex-basis <small class="control-hint">Pick an item's starting size</small></span>
+                <span>flex-basis <small class="control-hint" data-tooltip="Choose the starting width for each item." role="img" aria-label="Help: Choose the starting width for each item." tabindex="0">?</small></span>
                 <select name="basis">
                   <option value="150px">150px</option>
                   <option value="200px">200px</option>
@@ -159,7 +159,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>first item: order <small class="control-hint">Move the first item in line</small></span>
+                <span>first item: order <small class="control-hint" data-tooltip="Move the first animal and word to a different spot." role="img" aria-label="Help: Move the first animal and word to a different spot." tabindex="0">?</small></span>
                 <select name="order">
                   <option value="0" selected>0 (default)</option>
                   <option value="-1">-1</option>
@@ -168,7 +168,7 @@
                 </select>
               </label>
               <label class="control-field">
-                <span>first item: align-self <small class="control-hint">Move just one item across</small></span>
+                <span>first item: align-self <small class="control-hint" data-tooltip="Line up only the first animal and word differently." role="img" aria-label="Help: Line up only the first animal and word differently." tabindex="0">?</small></span>
                 <select name="alignSelf">
                   <option value="auto" selected>auto</option>
                   <option value="flex-start">flex-start</option>
@@ -259,14 +259,14 @@
           <div class="animal-photo"><img src="Images/squirrel.png" alt="A squirrel perched on a branch"></div>
           <div class="animal-info"><div><h3>Acorn</h3><p>Collector of treasures</p></div><span class="animal-emoji" aria-hidden="true">🐿️</span></div>
         </article>
-        <article class="animal-card animal-card--tall" data-animal="Mochi">
+        <!-- <article class="animal-card animal-card--tall" data-animal="Mochi">
           <div class="animal-photo"><img src="Images/wombat.png" alt="A round wombat resting in the grass"></div>
           <div class="animal-info"><div><h3>Mochi</h3><p>Professional napper</p></div><span class="animal-emoji" aria-hidden="true">🐻</span></div>
-        </article>
-        <article class="animal-card animal-card--short" data-animal="Bean">
+        </article> -->
+        <!-- <article class="animal-card animal-card--short" data-animal="Bean">
           <div class="animal-photo"><img src="Images/puppy.avif" alt="A tiny puppy sitting up and looking around"></div>
           <div class="animal-info"><div><h3>Bean</h3><p>Learning the ropes</p></div><span class="animal-emoji" aria-hidden="true">🐾</span></div>
-        </article>
+        </article> -->
           </div>
           <aside class="inline-context-note" id="inline-context-note">
             <span class="context-note-label">Neighboring content</span>
