@@ -4,6 +4,7 @@ const wordGallery = document.querySelector("#word-gallery");
 const previewPanel = document.querySelector("#preview-panel");
 const cards = [...gallery.querySelectorAll(".animal-card")];
 const wordPieces = [...wordGallery.querySelectorAll(".word-piece")];
+const galleryCount = document.querySelector("#gallery-count");
 const cssOutput = document.querySelector("#css-output");
 const behaviorOutput = document.querySelector("#behavior-output");
 const previewExplanation = document.querySelector("#preview-explanation");
@@ -217,4 +218,5 @@ for (const card of cards) {
   card.classList.remove("is-target");
 }
 cards[0].classList.add("is-target");
+galleryCount.textContent = `${cards.length} little ${cards.length === 1 ? "wonder" : "wonders"}`;
 updatePreview();
