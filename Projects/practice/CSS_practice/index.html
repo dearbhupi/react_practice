@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A hands-on CSS Flexbox practice gallery using local animal photos.">
+  <title>Flexbox Animal Gallery</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Little Wonders home">
+      <span class="brand-mark" aria-hidden="true">✿</span>
+      <span>Little Wonders</span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="#gallery">Gallery</a>
+      <a href="#flex-notes">Flexbox notes</a>
+    </nav>
+    <a class="header-button" href="#gallery">Meet the animals <span aria-hidden="true">→</span></a>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">A little practice, a lot of cute</p>
+      <h1 id="page-title">Flex your <span>Flexbox</span> skills.</h1>
+      <p class="intro-copy">
+        A responsive animal gallery made with everyday Flexbox properties.
+        Resize the page and watch the cards rearrange themselves.
+      </p>
+    </section>
+
+    <section class="gallery-section" id="gallery" aria-labelledby="gallery-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Interactive playground</p>
+          <h2 id="gallery-title">Change a property. See what happens.</h2>
+        </div>
+        <p class="gallery-count">08 little wonders</p>
+      </div>
+
+      <div class="playground">
+        <div class="control-workspace">
+          <form class="controls-panel" id="flex-controls">
+            <div class="controls-heading">
+              <div>
+                <h3>Flexbox controls</h3>
+                <p>Choose a value to update the preview instantly.</p>
+              </div>
+              <button class="reset-button" type="reset">Reset</button>
+            </div>
+
+            <div class="controls-layout">
+              <div class="controls-fields">
+            <fieldset>
+            <legend>Container properties</legend>
+            <div class="control-grid">
+              <label class="control-field">
+                <span>display</span>
+                <select name="display">
+                  <option value="flex">flex</option>
+                  <option value="inline-flex">inline-flex</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>flex-direction</span>
+                <select name="direction">
+                  <option value="row">row</option>
+                  <option value="row-reverse">row-reverse</option>
+                  <option value="column">column</option>
+                  <option value="column-reverse">column-reverse</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>flex-wrap</span>
+                <select name="wrap">
+                  <option value="wrap">wrap</option>
+                  <option value="nowrap">nowrap</option>
+                  <option value="wrap-reverse">wrap-reverse</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>justify-content</span>
+                <select name="justify">
+                  <option value="flex-start">flex-start</option>
+                  <option value="flex-end">flex-end</option>
+                  <option value="center">center</option>
+                  <option value="space-between">space-between</option>
+                  <option value="space-around">space-around</option>
+                  <option value="space-evenly">space-evenly</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>align-items</span>
+                <select name="alignItems">
+                  <option value="stretch">stretch</option>
+                  <option value="flex-start">flex-start</option>
+                  <option value="flex-end">flex-end</option>
+                  <option value="center">center</option>
+                  <option value="baseline">baseline</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>align-content</span>
+                <select name="alignContent">
+                  <option value="stretch">stretch</option>
+                  <option value="flex-start">flex-start</option>
+                  <option value="flex-end">flex-end</option>
+                  <option value="center">center</option>
+                  <option value="space-between">space-between</option>
+                  <option value="space-around">space-around</option>
+                  <option value="space-evenly">space-evenly</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>gap</span>
+                <select name="gap">
+                  <option value="8px">8px</option>
+                  <option value="16px">16px</option>
+                  <option value="24px" selected>24px</option>
+                  <option value="36px">36px</option>
+                  <option value="48px">48px</option>
+                </select>
+              </label>
+            </div>
+            </fieldset>
+
+            <fieldset>
+            <legend>Item properties <span>(applied to every card)</span></legend>
+            <div class="control-grid">
+              <label class="control-field">
+                <span>flex-grow</span>
+                <select name="grow">
+                  <option value="0" selected>0</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>flex-shrink</span>
+                <select name="shrink">
+                  <option value="0">0</option>
+                  <option value="1" selected>1</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>flex-basis</span>
+                <select name="basis">
+                  <option value="150px">150px</option>
+                  <option value="200px">200px</option>
+                  <option value="235px" selected>235px</option>
+                  <option value="300px">300px</option>
+                  <option value="40%">40%</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>first card: order</span>
+                <select name="order">
+                  <option value="0" selected>0 (default)</option>
+                  <option value="-1">-1</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                </select>
+              </label>
+              <label class="control-field">
+                <span>first card: align-self</span>
+                <select name="alignSelf">
+                  <option value="auto" selected>auto</option>
+                  <option value="flex-start">flex-start</option>
+                  <option value="flex-end">flex-end</option>
+                  <option value="center">center</option>
+                  <option value="stretch">stretch</option>
+                  <option value="baseline">baseline</option>
+                </select>
+              </label>
+            </div>
+            </fieldset>
+
+            <section class="behavior-preview" aria-live="polite">
+              <div class="behavior-icon" aria-hidden="true">↗</div>
+              <div>
+                <span class="behavior-title">What to expect</span>
+                <p id="behavior-output"></p>
+              </div>
+            </section>
+              </div>
+
+              <section class="code-preview" aria-label="Generated CSS preview">
+                <div class="code-titlebar">
+                  <span class="code-file-icon" aria-hidden="true">#</span>
+                  <span class="code-filename">style.css</span>
+                  <span class="code-live-indicator">LIVE</span>
+                </div>
+                <pre><code id="css-output" aria-live="polite"></code></pre>
+              </section>
+            </div>
+          </form>
+        </div>
+
+        <div class="preview-panel" id="preview-panel">
+          <div class="preview-heading">
+            <span>Live preview</span>
+            <span class="resize-hint">Drag the bottom-right corner to resize</span>
+          </div>
+          <div class="animal-gallery" id="animal-gallery">
+        <article class="animal-card animal-card--medium is-target" data-animal="Sunny">
+          <div class="animal-photo"><img src="Images/cute_dog.png" alt="A curious puppy looking toward the camera"></div>
+          <div class="animal-info"><div><h3>Sunny</h3><p>Chief tail-wagger</p></div><span class="animal-emoji" aria-hidden="true">🐶</span></div>
+        </article>
+        <article class="animal-card animal-card--short" data-animal="Bamboo">
+          <div class="animal-photo"><img src="Images/panda.png" alt="A fluffy panda sitting among greenery"></div>
+          <div class="animal-info"><div><h3>Bamboo</h3><p>Snack enthusiast</p></div><span class="animal-emoji" aria-hidden="true">🐼</span></div>
+        </article>
+        <article class="animal-card animal-card--tall" data-animal="Rusty">
+          <div class="animal-photo"><img src="Images/fox.png" alt="A red fox with bright, alert eyes"></div>
+          <div class="animal-info"><div><h3>Rusty</h3><p>Forest explorer</p></div><span class="animal-emoji" aria-hidden="true">🦊</span></div>
+        </article>
+        <article class="animal-card animal-card--short" data-animal="Button">
+          <div class="animal-photo"><img src="Images/calf.png" alt="A young calf standing in a field"></div>
+          <div class="animal-info"><div><h3>Button</h3><p>Meadow daydreamer</p></div><span class="animal-emoji" aria-hidden="true">🐮</span></div>
+        </article>
+        <article class="animal-card animal-card--tall" data-animal="Pickles">
+          <div class="animal-photo"><img src="Images/goat.png" alt="A playful young goat outdoors"></div>
+          <div class="animal-info"><div><h3>Pickles</h3><p>Excellent climber</p></div><span class="animal-emoji" aria-hidden="true">🐐</span></div>
+        </article>
+        <article class="animal-card animal-card--medium" data-animal="Acorn">
+          <div class="animal-photo"><img src="Images/squirrel.png" alt="A squirrel perched on a branch"></div>
+          <div class="animal-info"><div><h3>Acorn</h3><p>Collector of treasures</p></div><span class="animal-emoji" aria-hidden="true">🐿️</span></div>
+        </article>
+        <article class="animal-card animal-card--tall" data-animal="Mochi">
+          <div class="animal-photo"><img src="Images/wombat.png" alt="A round wombat resting in the grass"></div>
+          <div class="animal-info"><div><h3>Mochi</h3><p>Professional napper</p></div><span class="animal-emoji" aria-hidden="true">🐻</span></div>
+        </article>
+        <article class="animal-card animal-card--short" data-animal="Bean">
+          <div class="animal-photo"><img src="Images/puppy.avif" alt="A tiny puppy sitting up and looking around"></div>
+          <div class="animal-info"><div><h3>Bean</h3><p>Learning the ropes</p></div><span class="animal-emoji" aria-hidden="true">🐾</span></div>
+        </article>
+          </div>
+          <aside class="inline-context-note" id="inline-context-note">
+            <span class="context-note-label">Neighboring content</span>
+            <span>This sibling can sit beside an <code>inline-flex</code> container when there is room.</span>
+          </aside>
+        </div>
+
+        <div class="preview-details">
+          <aside class="flex-notes" id="flex-notes">
+            <div class="notes-icon" aria-hidden="true">✦</div>
+            <div>
+              <h2>What makes the cards flex?</h2>
+              <p id="preview-explanation" aria-live="polite"></p>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>Made for curious minds and tiny paws.</span>
+    <span>Flexbox practice · 2026</span>
+  </footer>
+  <script src="flexbox.js" defer></script>
+</body>
+</html>
