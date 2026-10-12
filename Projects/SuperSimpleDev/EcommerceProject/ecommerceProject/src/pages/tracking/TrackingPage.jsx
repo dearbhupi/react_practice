@@ -1,13 +1,9 @@
-import './Tracking.css'
-import { Header } from '../components/Header'
-import { Link } from 'react-router-dom'
+import "./TrackingPage.css";
+import { Link } from "react-router-dom";
 
-export function Tracking() {
+export function TrackingPage() {
   return (
     <>
-    <Header />
-     
-
     <div className="tracking-page">
       <div className="order-tracking">
         <Link className="back-to-orders-link link-primary" to="/orders">
@@ -48,4 +44,3 @@ export function Tracking() {
     </>
   )
 }
-

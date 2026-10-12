@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./CheckoutPage.css";
-import "./checkout-header.css";
-import { CheckoutHeader } from "../components/checkout/CheckoutHeader";
-import { OrderSummary } from "../components/checkout/OrderSummary";
-import { PaymentSummary } from "../components/checkout/PaymentSummary";
+import { CheckoutHeader } from "../../components/checkout/CheckoutHeader";
+import { OrderSummary } from "../../components/checkout/OrderSummary";
+import { PaymentSummary } from "../../components/checkout/PaymentSummary";
+import { useCart } from "../../hooks/useCart";
+import {
+  getDeliveryOptions,
+  getPaymentSummary,
+  placeOrder as submitOrder,
+} from "../../services/checkoutService";
+import { updateCartItem } from "../../services/cartService";
 
-export function CheckoutPage({ cartItems = [], onOrderPlaced }) {
+export function CheckoutPage() {
   const navigate = useNavigate();
+  const { cartItems, refreshCart } = useCart();
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [paymentSummary, setPaymentSummary] = useState(null);
@@ -20,25 +26,13 @@ export function CheckoutPage({ cartItems = [], onOrderPlaced }) {
 
     async function loadCheckoutData() {
       try {
-        const [deliveryResponse, summaryResponse] = await Promise.all([
-          axios.get("/api/delivery-options?expand=estimatedDeliveryTime", {
-            signal: controller.signal,
-          }),
-          axios.get("/api/payment-summary", { signal: controller.signal }),
+        const [options, summary] = await Promise.all([
+          getDeliveryOptions(controller.signal),
+          getPaymentSummary(controller.signal),
         ]);
 
-        if (
-          !Array.isArray(deliveryResponse.data) ||
-          !summaryResponse.data ||
-          typeof summaryResponse.data.totalItems !== "number"
-        ) {
-          throw new TypeError(
-            "Checkout API returned data in an unexpected format.",
-          );
-        }
-
-        setDeliveryOptions(deliveryResponse.data);
-        setPaymentSummary(summaryResponse.data);
+        setDeliveryOptions(options);
+        setPaymentSummary(summary);
       } catch (requestError) {
         if (controller.signal.aborted) return;
 
@@ -59,11 +53,10 @@ export function CheckoutPage({ cartItems = [], onOrderPlaced }) {
     setError("");
 
     try {
-      await axios.put(`/api/cart-items/${productId}`, {
+      await updateCartItem(productId, {
         deliveryOptionId: optionId,
       });
-      const summaryResponse = await axios.get("/api/payment-summary");
-      setPaymentSummary(summaryResponse.data);
+      setPaymentSummary(await getPaymentSummary());
       setSelectedOptions((options) => ({ ...options, [productId]: optionId }));
     } catch (requestError) {
       console.error("Error updating delivery option:", requestError);
@@ -76,8 +69,8 @@ export function CheckoutPage({ cartItems = [], onOrderPlaced }) {
     setError("");
 
     try {
-      await axios.post("/api/orders");
-      onOrderPlaced?.();
+      await submitOrder();
+      await refreshCart();
       navigate("/orders");
     } catch (requestError) {
       console.error("Error placing order:", requestError);

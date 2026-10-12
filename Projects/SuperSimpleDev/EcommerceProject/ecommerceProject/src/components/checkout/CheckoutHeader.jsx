@@ -1,3 +1,5 @@
+import "./CheckoutHeader.css";
+
 export function CheckoutHeader({ itemCount }) {
   return (
     <div className="checkout-header">
