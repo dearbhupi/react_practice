@@ -9,6 +9,10 @@ const cssOutput = document.querySelector("#css-output");
 const behaviorOutput = document.querySelector("#behavior-output");
 const previewExplanation = document.querySelector("#preview-explanation");
 const wordTip = document.querySelector("#word-tip");
+const xAxisStart = document.querySelector("#x-axis-start");
+const xAxisEnd = document.querySelector("#x-axis-end");
+const yAxisStart = document.querySelector("#y-axis-start");
+const yAxisEnd = document.querySelector("#y-axis-end");
 const inlineContextNote = document.querySelector("#inline-context-note");
 
 const displayDescriptions = {
@@ -108,6 +112,17 @@ function updatePreview(event) {
   wordGallery.style.alignContent = get("alignContent");
   wordGallery.style.gap = get("gap");
   wordGallery.classList.toggle("is-column", isColumn);
+
+  const isReverseDirection = get("direction").endsWith("reverse");
+  const isWrapReverse = get("wrap") === "wrap-reverse";
+  const xIsMainAxis = !isColumn;
+  const yIsMainAxis = isColumn;
+  const xIsReversed = xIsMainAxis ? isReverseDirection : isWrapReverse;
+  const yIsReversed = yIsMainAxis ? isReverseDirection : isWrapReverse;
+  xAxisStart.textContent = xIsReversed ? "flex-end" : "flex-start";
+  xAxisEnd.textContent = xIsReversed ? "flex-start" : "flex-end";
+  yAxisStart.textContent = yIsReversed ? "flex-end" : "flex-start";
+  yAxisEnd.textContent = yIsReversed ? "flex-start" : "flex-end";
 
   for (const card of cards) {
     card.style.flexGrow = get("grow");

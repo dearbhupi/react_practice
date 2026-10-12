@@ -482,6 +482,7 @@ h1 span {
 }
 
 .word-gallery {
+  position: relative;
   display: flex;
   width: 100%;
   height: 300px;
@@ -553,6 +554,53 @@ h1 span {
 .word-piece--six {
   min-height: 58px;
   background: #f7e9a8;
+}
+
+.word-axis-watermark {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+
+.axis-watermark-label {
+  position: absolute;
+  padding: 4px 7px;
+  border: 1px solid rgb(107 119 101 / 15%);
+  border-radius: 6px;
+  background: rgb(255 254 250 / 76%);
+  color: #647364;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: .72;
+  white-space: nowrap;
+}
+
+.axis-watermark-label--x-start {
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+}
+
+.axis-watermark-label--x-end {
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+.axis-watermark-label--y-start {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  writing-mode: vertical-rl;
+}
+
+.axis-watermark-label--y-end {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  writing-mode: vertical-rl;
 }
 
 .word-tip {
