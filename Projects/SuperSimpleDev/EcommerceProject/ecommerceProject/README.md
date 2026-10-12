@@ -1,16 +1,41 @@
-# React + Vite
+# Bhupi Mart frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 storefront built with Vite and React Router. The UI calls the
+Express backend through the `/api` and `/images` Vite development proxies.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install frontend dependencies with `npm install`.
+2. Start the backend from `../ecommerce-backend-js` with `npm install` and
+   `npm run dev`.
+3. Start Vite here with `npm run dev`.
 
-## React Compiler
+The frontend expects the backend at `http://localhost:3000` during development.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Project structure
 
-## Expanding the ESLint configuration
+- `src/app`: route composition.
+- `src/components`: reusable layout, product, order, and checkout UI.
+- `src/context`: shared cart context and provider.
+- `src/hooks`: stateful product and cart access.
+- `src/pages`: route-level page composition.
+- `src/services`: HTTP operations and response validation, grouped by feature.
+- `src/styles`: global styles; page-specific styles stay next to their page.
+- `src/utils`: small shared formatting helpers.
+- `tests`: Node test-runner tests for service contracts and utility behavior.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The exported functions and components have concise JSDoc comments explaining
+their responsibilities. Service functions are the frontend's API boundary;
+components consume their results through hooks and page callbacks.
+
+## Quality checks
+
+```sh
+npm run lint
+npm run test
+npm run build
+```
+
+Service tests stub Axios at its adapter boundary, so they do not require a
+running backend. Backend HTTP behavior is tested separately in the backend's
+`tests` folder.

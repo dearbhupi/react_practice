@@ -1,5 +1,6 @@
 import "./CheckoutHeader.css";
 
+/** Renders the checkout-specific header and current cart item count. */
 export function CheckoutHeader({ itemCount }) {
   return (
     <div className="checkout-header">

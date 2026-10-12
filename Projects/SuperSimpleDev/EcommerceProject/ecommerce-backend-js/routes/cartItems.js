@@ -5,6 +5,7 @@ import { DeliveryOption } from '../models/DeliveryOption.js';
 
 const router = express.Router();
 
+/** Lists cart lines and optionally expands each line with its product. */
 router.get('/', async (req, res) => {
   const expand = req.query.expand;
   let cartItems = await CartItem.findAll();
@@ -22,6 +23,7 @@ router.get('/', async (req, res) => {
   res.json(cartItems);
 });
 
+/** Adds a validated product quantity or increments its existing cart line. */
 router.post('/', async (req, res) => {
   const { productId, quantity } = req.body;
 
@@ -45,6 +47,7 @@ router.post('/', async (req, res) => {
   res.status(201).json(cartItem);
 });
 
+/** Updates a cart line's quantity and/or delivery option. */
 router.put('/:productId', async (req, res) => {
   const { productId } = req.params;
   const { quantity, deliveryOptionId } = req.body;
@@ -73,6 +76,7 @@ router.put('/:productId', async (req, res) => {
   res.json(cartItem);
 });
 
+/** Deletes a cart line by product identifier. */
 router.delete('/:productId', async (req, res) => {
   const { productId } = req.params;
 

@@ -3,6 +3,7 @@ import { DeliveryOption } from '../models/DeliveryOption.js';
 
 const router = express.Router();
 
+/** Lists delivery options, optionally adding estimated delivery timestamps. */
 router.get('/', async (req, res) => {
   const expand = req.query.expand;
   const deliveryOptions = await DeliveryOption.findAll();

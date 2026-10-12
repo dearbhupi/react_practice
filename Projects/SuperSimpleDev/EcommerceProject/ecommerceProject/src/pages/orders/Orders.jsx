@@ -5,6 +5,7 @@ import { useCart } from "../../hooks/useCart";
 import { getOrders } from "../../services/ordersService";
 import "./OrdersPage.css";
 
+/** Loads order history and coordinates the buy-again cart action. */
 export function Orders() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -16,6 +17,7 @@ export function Orders() {
   useEffect(() => {
     const controller = new AbortController();
 
+    /** Loads the customer's orders with product details expanded. */
     async function loadOrders() {
       try {
         setOrders(await getOrders(controller.signal));
@@ -33,6 +35,7 @@ export function Orders() {
     return () => controller.abort();
   }, []);
 
+  /** Adds an ordered product to the cart and navigates to checkout. */
   async function addProductToCart(productId, quantity) {
     setAddingProductId(productId);
     setError("");

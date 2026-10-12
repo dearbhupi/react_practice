@@ -1,6 +1,7 @@
 import "./TrackingPage.css";
 import { Link } from "react-router-dom";
 
+/** Displays shipment progress for the selected order and product. */
 export function TrackingPage() {
   return (
     <>

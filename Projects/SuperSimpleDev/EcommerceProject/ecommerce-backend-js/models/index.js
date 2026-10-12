@@ -40,6 +40,7 @@ if (isUsingRDS) {
   sequelize.addHook('afterBulkUpdate', saveDatabaseToFile);
 }
 
+/** Persists the in-memory SQL.js database snapshot to the current directory. */
 export async function saveDatabaseToFile() {
   const dbInstance = await sequelize.connectionManager.getConnection();
   const binaryArray = dbInstance.database.export();

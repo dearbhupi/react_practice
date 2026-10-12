@@ -1,5 +1,6 @@
 import axios from "axios";
 
+/** Returns order history with each line's product expanded. */
 export async function getOrders(signal) {
   const response = await axios.get("/api/orders?expand=products", { signal });
 

@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from './index.js';
 
+/** Sequelize model for a product quantity and delivery choice in the cart. */
 export const CartItem = sequelize.define('CartItem', {
   productId: {
     type: DataTypes.UUID,

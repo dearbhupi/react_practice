@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from './index.js';
 
+/** Sequelize model for a delivery duration and its shipping price. */
 export const DeliveryOption = sequelize.define('DeliveryOption', {
   id: {
     type: DataTypes.STRING,

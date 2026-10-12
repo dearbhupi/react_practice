@@ -1,5 +1,6 @@
 import formatMoney from "../../utils/money";
 
+/** Displays the server-calculated total and submits the reviewed order. */
 export function PaymentSummary({
   paymentSummary,
   itemCount,

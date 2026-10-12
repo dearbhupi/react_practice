@@ -2,6 +2,7 @@ import "./Header.css";
 import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "../../hooks/useCart";
 
+/** Renders storefront navigation, live cart quantity, and URL-backed search. */
 export function Header() {
   const { cartItems } = useCart();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,6 +12,7 @@ export function Header() {
     0,
   );
 
+  /** Updates the query string as the shopper edits the search field. */
   function updateSearch(event) {
     const value = event.target.value;
 

@@ -3,6 +3,7 @@ import { Product } from '../models/Product.js';
 
 const router = express.Router();
 
+/** Lists products, optionally matching a case-insensitive name or keyword query. */
 router.get('/', async (req, res) => {
   const search = req.query.search;
 

@@ -1,5 +1,6 @@
 import formatMoney from "../../utils/money";
 
+/** Formats a delivery timestamp for customer-facing checkout copy. */
 function formatDeliveryDate(timestamp) {
   return new Date(timestamp).toLocaleDateString(undefined, {
     weekday: "long",
@@ -8,6 +9,7 @@ function formatDeliveryDate(timestamp) {
   });
 }
 
+/** Renders delivery choices for one cart item. */
 function DeliveryOptions({ cartItem, deliveryOptions, selectedOptionId, onSelect }) {
   return (
     <div className="delivery-options">
@@ -37,6 +39,7 @@ function DeliveryOptions({ cartItem, deliveryOptions, selectedOptionId, onSelect
   );
 }
 
+/** Shows product details and delivery selection for one cart line. */
 function CartItem({ cartItem, deliveryOptions, selectedOptionId, onSelect }) {
   const selectedOption = deliveryOptions.find(
     (option) => option.id === selectedOptionId,
@@ -80,6 +83,7 @@ function CartItem({ cartItem, deliveryOptions, selectedOptionId, onSelect }) {
   );
 }
 
+/** Lists checkout cart lines and delegates delivery changes to the page. */
 export function OrderSummary({
   cartItems,
   deliveryOptions,

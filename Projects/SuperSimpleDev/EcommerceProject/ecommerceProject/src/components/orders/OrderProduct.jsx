@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 
+/** Displays one purchased product and forwards its buy-again action. */
 export function OrderProduct({ item, isAdding, onBuyAgain }) {
   return (
     <>

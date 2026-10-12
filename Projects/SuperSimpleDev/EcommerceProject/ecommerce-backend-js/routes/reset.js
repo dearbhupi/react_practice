@@ -11,6 +11,7 @@ import { defaultOrders } from '../defaultData/defaultOrders.js';
 
 const router = express.Router();
 
+/** Recreates the database schema and repopulates the starter dataset. */
 router.post('/', async (req, res) => {
   await sequelize.sync({ force: true });
 

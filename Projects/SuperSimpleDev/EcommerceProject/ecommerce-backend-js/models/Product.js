@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from './index.js';
 
+/** Sequelize model describing a catalog product and its searchable keywords. */
 export const Product = sequelize.define('Product', {
   id: {
     type: DataTypes.UUID,

@@ -1,5 +1,6 @@
 import axios from "axios";
 
+/** Returns delivery options with estimated delivery timestamps. */
 export async function getDeliveryOptions(signal) {
   const response = await axios.get(
     "/api/delivery-options?expand=estimatedDeliveryTime",
@@ -13,6 +14,7 @@ export async function getDeliveryOptions(signal) {
   return response.data;
 }
 
+/** Returns validated server-calculated cart totals. */
 export async function getPaymentSummary(signal) {
   const response = await axios.get("/api/payment-summary", { signal });
   const summary = response.data;
@@ -24,6 +26,7 @@ export async function getPaymentSummary(signal) {
   return summary;
 }
 
+/** Submits the current cart to create an order. */
 export async function placeOrder() {
   await axios.post("/api/orders");
 }

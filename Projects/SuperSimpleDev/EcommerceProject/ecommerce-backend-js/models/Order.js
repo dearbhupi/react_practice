@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from './index.js';
 
+/** Sequelize model for a placed order and its immutable product snapshot. */
 export const Order = sequelize.define('Order', {
   id: {
     type: DataTypes.UUID,

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../services/productsService";
 
+/** Fetches products for the current URL search query with abort-safe state. */
 export function useProducts() {
   const [searchParams] = useSearchParams();
   const search = searchParams.get("search")?.trim() ?? "";
@@ -12,6 +13,7 @@ export function useProducts() {
   useEffect(() => {
     const controller = new AbortController();
 
+    /** Requests the current query and retains explicit loading/error state. */
     async function loadProducts() {
       try {
         setProducts(await getProducts(search, controller.signal));

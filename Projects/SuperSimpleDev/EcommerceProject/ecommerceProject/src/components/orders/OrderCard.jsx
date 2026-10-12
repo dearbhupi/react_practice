@@ -3,6 +3,7 @@ import { Fragment } from "react";
 import formatMoney from "../../utils/money";
 import { OrderProduct } from "./OrderProduct";
 
+/** Renders an order summary and its products with buy-again actions. */
 export function OrderCard({ order, addingProductId, onBuyAgain }) {
   return (
     <div className="order-container">

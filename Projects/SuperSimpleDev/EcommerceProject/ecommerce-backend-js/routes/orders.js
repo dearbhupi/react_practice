@@ -6,6 +6,7 @@ import { CartItem } from '../models/CartItem.js';
 
 const router = express.Router();
 
+/** Lists orders newest-first and optionally expands each order's products. */
 router.get('/', async (req, res) => {
   const expand = req.query.expand;
   let orders = await Order.unscoped().findAll({ order: [['orderTimeMs', 'DESC']] }); // Sort by most recent
@@ -29,6 +30,7 @@ router.get('/', async (req, res) => {
   res.json(orders);
 });
 
+/** Creates an order from the cart and clears cart lines after success. */
 router.post('/', async (req, res) => {
   const cartItems = await CartItem.findAll();
 
@@ -70,6 +72,7 @@ router.post('/', async (req, res) => {
   res.status(201).json(order);
 });
 
+/** Fetches a single order by id and optionally expands its product details. */
 router.get('/:orderId', async (req, res) => {
   const { orderId } = req.params;
   const expand = req.query.expand;

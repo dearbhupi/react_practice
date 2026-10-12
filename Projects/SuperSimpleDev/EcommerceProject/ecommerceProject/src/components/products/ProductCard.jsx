@@ -1,12 +1,14 @@
 import { useState } from "react";
 import formatMoney from "../../utils/money";
 
+/** Displays product information and manages its add-to-cart interaction. */
 export function ProductCard({ product, isInCart, onAddToCart }) {
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [wasAdded, setWasAdded] = useState(false);
   const [error, setError] = useState("");
 
+  /** Adds the selected quantity and exposes request progress or failure. */
   async function handleAddToCart() {
     setIsAdding(true);
     setWasAdded(false);

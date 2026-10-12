@@ -6,6 +6,7 @@ import { Orders } from "../pages/orders/Orders";
 import { TrackingPage } from "../pages/tracking/TrackingPage";
 import { StoreLayout } from "../components/layout/StoreLayout";
 
+/** Maps the storefront, checkout, order, and tracking routes to their pages. */
 function App() {
   return (
     <Routes>

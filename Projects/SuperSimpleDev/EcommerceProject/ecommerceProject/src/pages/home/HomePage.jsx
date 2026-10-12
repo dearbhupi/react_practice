@@ -3,6 +3,7 @@ import { ProductGrid } from "../../components/products/ProductGrid";
 import { useCart } from "../../hooks/useCart";
 import { useProducts } from "../../hooks/useProducts";
 
+/** Presents searchable products and their add-to-cart actions. */
 function HomePage() {
   const { products, isLoading, error } = useProducts();
   const { cartItems, addToCart } = useCart();

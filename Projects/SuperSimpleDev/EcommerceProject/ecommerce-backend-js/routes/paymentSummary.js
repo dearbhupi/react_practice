@@ -5,6 +5,7 @@ import { DeliveryOption } from '../models/DeliveryOption.js';
 
 const router = express.Router();
 
+/** Calculates cart item, product, shipping, tax, and grand totals in cents. */
 router.get('/', async (req, res) => {
   const cartItems = await CartItem.findAll();
   let totalItems = 0;
