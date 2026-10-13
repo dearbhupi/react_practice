@@ -581,26 +581,28 @@ h1 span {
   top: 50%;
   left: 8px;
   transform: translateY(-50%);
+  writing-mode: vertical-rl;
 }
 
 .axis-watermark-label--x-end {
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
+  writing-mode: vertical-rl;
 }
 
 .axis-watermark-label--y-start {
   top: 8px;
   left: 50%;
   transform: translateX(-50%);
-  writing-mode: vertical-rl;
+  /* writing-mode: vertical-rl; */
 }
 
 .axis-watermark-label--y-end {
   bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
-  writing-mode: vertical-rl;
+  /* writing-mode: vertical-rl; */
 }
 
 .word-tip {
